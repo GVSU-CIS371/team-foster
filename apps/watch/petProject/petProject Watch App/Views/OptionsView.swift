@@ -1,5 +1,5 @@
 //
-//  Options.swift
+//  OptionsView.swift
 //  petProject
 //
 //  Created by Aaron Foster on 3/1/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Options: View {
+struct OptionsView: View {
     
     init(){}
     

@@ -1,5 +1,5 @@
 //
-//  Login.swift
+//  LoginView.swift
 //  petProject
 //
 //  Created by Aaron Foster on 3/5/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Login: View {
+struct LoginView: View {
     @State private var username: String = ""
     @State private var password: String = ""
     

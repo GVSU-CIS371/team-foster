@@ -1,5 +1,5 @@
 //
-//  Pet.swift
+//  PetView.swift
 //  petProject
 //
 //  Created by Aaron Foster on 3/1/26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Pet: View{
+struct PetView: View{
     @ObservedObject var vm: PetViewModel
     
     private var onInventory: () -> Void
@@ -24,15 +24,15 @@ struct Pet: View{
             HStack(spacing:30){
                 VStack{
                     Text("🙂")
-                    Text("99")
+                    Text("\(vm.player.pet?.happiness ?? 0)")
                 }
                 VStack{
                     Text("🍽️")
-                    Text("99")
+                    Text("\(vm.player.pet?.hunger ?? 0)")
                 }
                 VStack{
                     Text("🫧")
-                    Text("99")
+                    Text("\(vm.player.pet?.hygiene ?? 0)")
                 }
             }.navigationBarBackButtonHidden(true).frame(maxWidth: .infinity).background(Color.blue).padding(.top, 32).ignoresSafeArea(edges: .top)
 
