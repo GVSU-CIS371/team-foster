@@ -38,15 +38,15 @@ class Pet: Identifiable, ObservableObject{
     }
     
     func updateHunger(_ hunger: Int) {
-        self.hunger = min(max(0, hunger), 100)
+        self.hunger = min(max(0, self.hunger + hunger), 100)
     }
     
     func updateHappiness(_ happiness: Int) {
-        self.happiness = min(max(0, happiness), 100)
+        self.happiness = min(max(0, self.happiness + happiness), 100)
     }
     
     func updateHygiene(_ hygiene: Int) {
-        self.hygiene = min(max(0, hygiene), 100)
+        self.hygiene = min(max(0, self.hygiene + hygiene), 100)
     }
     
     func updateEquipped(_ item: Item?) {
@@ -54,9 +54,9 @@ class Pet: Identifiable, ObservableObject{
     }
     
     func decayPetStats(){
-        let newHunger = self.hunger - self.hungerDecayRate
-        let newHappiness = self.happiness - self.happinessDecayRate
-        let newHygiene = self.hygiene - self.hygieneDecayRate
+        let newHunger = -self.hungerDecayRate
+        let newHappiness = -self.happinessDecayRate
+        let newHygiene = -self.hygieneDecayRate
         
         self.updateHunger(newHunger)
         self.updateHappiness(newHappiness)

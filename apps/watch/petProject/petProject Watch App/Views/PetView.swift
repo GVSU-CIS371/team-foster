@@ -9,7 +9,8 @@ import SwiftUI
 
 struct PetView: View{
     @ObservedObject var vm: PetViewModel
-    
+    @State private var missingItem = false
+    @State private var alertMessage = ""
     private var onInventory: () -> Void
     private var onOptions: () -> Void
     
@@ -57,21 +58,45 @@ struct PetView: View{
             Spacer()
             
             HStack(spacing:0){
-                Button(action: {print("Pet Played!")}){
+                Button(action: {
+                    if let invItem = vm.player.inventory.allItems.first(where: {$0.item.type == .Toy}){
+                        vm.useItem(invItem.item)
+                    }
+                    else{
+                        missingItem = true
+                        alertMessage = "You don't have any toys!"
+                    }
+                    print("Pet Played!")}){
                     VStack{
                         Text("🎮")
                         Text("Play")
                     }
                 }
                 
-                Button(action: {print("Pet Fed!")}){
+                Button(action: {
+                    if let invItem = vm.player.inventory.allItems.first(where: {$0.item.type == .Food}){
+                        vm.useItem(invItem.item)
+                    }
+                    else {
+                        missingItem = true
+                        alertMessage = "You don't have any food!"
+                    }
+                    print("Pet Fed!")}){
                     VStack{
                         Text("🍗")
                         Text("Feed")
                     }
                 }
                 
-                Button(action: {print("Pet Washed!")}){
+                Button(action: {
+                    if let invItem = vm.player.inventory.allItems.first(where: {$0.item.type == .Hygiene}){
+                        vm.useItem(invItem.item)
+                    }
+                    else {
+                        missingItem = true
+                        alertMessage = "You don't have any hygiene items!"
+                    }
+                    print("Pet Washed!")}){
                     VStack{
                         Text("🚿")
                         Text("Wash")
@@ -79,6 +104,10 @@ struct PetView: View{
                 }
             }.frame(maxWidth: .infinity).background(Color.blue).padding(.bottom, 10).ignoresSafeArea(edges: .bottom)
             
-        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity).alert("Missing Items", isPresented: $missingItem){
+            Button("Ok", role: .cancel) {}
+        } message: {
+            Text(alertMessage)
+        }
     }
 }

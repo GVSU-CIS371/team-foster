@@ -50,7 +50,7 @@ struct ContentView: View {
                         navCtrl.navigate(to: .OptionsView)
                     }
                 case .InventoryView:
-                    InventoryView(){
+                    InventoryView(vm: petViewModel){
                         navCtrl.navigate(to: .ShopView)
                     }
                     
