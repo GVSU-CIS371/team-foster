@@ -8,29 +8,47 @@
 import Foundation
 import Combine
 
+struct PetType {
+    let id: UUID
+    let name: String
+    let image: String
+    let decayRates: PetStats
+    
+    init(id: UUID = UUID(), name: String = "Test Type", image: String = "testImage", decayRates: PetStats = PetStats(hunger: 1, happiness: 2, hygiene: 3)){
+        self.id = id
+        self.name = name
+        self.image = image
+        self.decayRates = decayRates
+    }
+}
+
+struct PetStats{
+    var hunger: Int = 50
+    var happiness: Int = 50
+    var hygiene: Int = 50
+    
+    init(hunger: Int = 50, happiness: Int = 50, hygiene: Int = 50) {
+        self.hunger = hunger
+        self.happiness = happiness
+        self.hygiene = hygiene
+    }
+}
+
 @Observable
 class Pet: Identifiable, ObservableObject{
     let id: UUID
     private(set) var name: String = "Default Name"
-    private(set) var hunger: Int
-    private(set) var happiness: Int
-    private(set) var hygiene: Int
+    private(set) var type: PetType
+    private(set) var stats: PetStats
     private(set) var equipped: Item?
 
-    private(set) var hungerDecayRate: Int
-    private(set) var happinessDecayRate: Int
-    private(set) var hygieneDecayRate: Int
     
-    init(id: UUID = UUID(), name:String = "Test Pet", hunger: Int = 50, happiness: Int = 50, hygiene: Int = 50, equipped: Item? = nil, hungerDecayRate: Int = 1, happinessDecayRate: Int = 2, hygieneDecayRate: Int = 3){
+    init(id: UUID = UUID(), name:String = "Test Pet", type: PetType = PetType(), stats: PetStats = PetStats(), equipped: Item? = nil){
         self.id = id
         self.name = name
-        self.hunger = hunger
-        self.happiness = happiness
-        self.hygiene = hygiene
+        self.type = type
+        self.stats = stats
         self.equipped = equipped
-        self.hungerDecayRate = hungerDecayRate
-        self.happinessDecayRate = happinessDecayRate
-        self.hygieneDecayRate = hygieneDecayRate
     }
     
     func setName(_ name: String) {
@@ -38,15 +56,15 @@ class Pet: Identifiable, ObservableObject{
     }
     
     func updateHunger(_ hunger: Int) {
-        self.hunger = min(max(0, self.hunger + hunger), 100)
+        self.stats.hunger = min(max(0, self.stats.hunger + hunger), 100)
     }
     
     func updateHappiness(_ happiness: Int) {
-        self.happiness = min(max(0, self.happiness + happiness), 100)
+        self.stats.happiness = min(max(0, self.stats.happiness + happiness), 100)
     }
     
     func updateHygiene(_ hygiene: Int) {
-        self.hygiene = min(max(0, self.hygiene + hygiene), 100)
+        self.stats.hygiene = min(max(0, self.stats.hygiene + hygiene), 100)
     }
     
     func updateEquipped(_ item: Item?) {
@@ -54,9 +72,9 @@ class Pet: Identifiable, ObservableObject{
     }
     
     func decayPetStats(){
-        let newHunger = -self.hungerDecayRate
-        let newHappiness = -self.happinessDecayRate
-        let newHygiene = -self.hygieneDecayRate
+        let newHunger = -self.type.decayRates.hunger
+        let newHappiness = -self.type.decayRates.happiness
+        let newHygiene = -self.type.decayRates.hygiene
         
         self.updateHunger(newHunger)
         self.updateHappiness(newHappiness)

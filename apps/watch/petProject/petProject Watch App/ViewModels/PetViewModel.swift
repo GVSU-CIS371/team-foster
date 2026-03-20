@@ -13,6 +13,7 @@ import Combine
 class PetViewModel: ObservableObject {
     var player: Player
     var shop: Shop
+    var petTypes: [PetType] = []
     private var timer:Timer = Timer()
     
     init(player: Player, shop: Shop){
@@ -25,6 +26,10 @@ class PetViewModel: ObservableObject {
         self.timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true){ _ in
             self.player.pet?.decayPetStats()
         }
+    }
+    
+    func newPet(name: String, type: PetType){
+        self.player.pet = Pet(name: name, type: type, stats: PetStats(hunger: 100, happiness: 100, hygiene: 100))
     }
     
     func buyItem(_ shopItem: ShopItem){

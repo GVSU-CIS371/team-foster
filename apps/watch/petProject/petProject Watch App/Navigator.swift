@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 
 enum Route: Hashable{
+    case CreatePetView
     case PetView
     case InventoryView
     case OptionsView

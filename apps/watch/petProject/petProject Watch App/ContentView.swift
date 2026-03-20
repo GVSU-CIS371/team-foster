@@ -7,9 +7,15 @@
 
 import SwiftUI
 
-var testPet = Pet(id: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!)
+var testPetType1 = PetType(id: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!, name:"Type 1", image: "", decayRates: PetStats(hunger: 1, happiness: 2, hygiene: 3))
 
-var testPlayer = Player(id: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!, pet: Pet())
+var testPetType2 = PetType(id: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!, name:"Type 2", image: "", decayRates: PetStats(hunger: 3, happiness: 1, hygiene: 2))
+
+var testPetType3 = PetType(id: UUID(uuidString: "33333333-3333-3333-3333-333333333333")!, name:"Type 3", image: "", decayRates: PetStats(hunger: 2, happiness: 3, hygiene: 1))
+
+//var testPet = Pet(id: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!)
+
+var testPlayer = Player(id: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!)
 
 var testShop = Shop(id: UUID(uuidString:"33333333-3333-3333-3333-333333333333")!)
 
@@ -34,15 +40,27 @@ struct ContentView: View {
         petViewModel.shop.addShopItem(testSFood)
         petViewModel.shop.addShopItem(testSToy)
         petViewModel.shop.addShopItem(testSHygiene)
+        petViewModel.petTypes.append(testPetType1)
+        petViewModel.petTypes.append(testPetType2)
+        petViewModel.petTypes.append(testPetType3)
     }
     
     var body: some View {
         NavigationStack(path: $navCtrl.navPath){
             LoginView(){
-                navCtrl.navigate(to: .PetView)
+                if petViewModel.player.pet == nil{
+                    navCtrl.navigate(to: .CreatePetView)
+                }
+                else {
+                    navCtrl.navigate(to: .PetView)
+                }
             }
             .navigationDestination(for: Route.self){ dest in
                 switch dest{
+                case .CreatePetView:
+                    CreatePetView(vm: petViewModel){
+                        navCtrl.navigate(to: .PetView)
+                    }
                 case .PetView:
                     PetView(vm: petViewModel){
                         navCtrl.navigate(to: .InventoryView)

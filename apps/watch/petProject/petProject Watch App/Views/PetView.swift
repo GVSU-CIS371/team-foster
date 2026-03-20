@@ -25,17 +25,17 @@ struct PetView: View{
             HStack(spacing:30){
                 VStack{
                     Text("🙂")
-                    Text("\(vm.player.pet?.happiness ?? 0)")
+                    Text("\(vm.player.pet?.stats.happiness ?? 0)")
                 }
                 VStack{
                     Text("🍽️")
-                    Text("\(vm.player.pet?.hunger ?? 0)")
+                    Text("\(vm.player.pet?.stats.hunger ?? 0)")
                 }
                 VStack{
                     Text("🫧")
-                    Text("\(vm.player.pet?.hygiene ?? 0)")
+                    Text("\(vm.player.pet?.stats.hygiene ?? 0)")
                 }
-            }.navigationBarBackButtonHidden(true).frame(maxWidth: .infinity).background(Color.blue).padding(.top, 32).ignoresSafeArea(edges: .top)
+            }.frame(maxWidth: .infinity).background(Color.blue).padding(.top, 32).ignoresSafeArea(edges: .top)
 
             Spacer()
             
@@ -104,7 +104,7 @@ struct PetView: View{
                 }
             }.frame(maxWidth: .infinity).background(Color.blue).padding(.bottom, 10).ignoresSafeArea(edges: .bottom)
             
-        }.frame(maxWidth: .infinity, maxHeight: .infinity).alert("Missing Items", isPresented: $missingItem){
+        }.navigationBarBackButtonHidden(true).frame(maxWidth: .infinity, maxHeight: .infinity).alert("Missing Items", isPresented: $missingItem){
             Button("Ok", role: .cancel) {}
         } message: {
             Text(alertMessage)
