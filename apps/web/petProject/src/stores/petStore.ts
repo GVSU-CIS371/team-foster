@@ -1,53 +1,53 @@
 import { defineStore } from 'pinia'
-import crowImg from '/pets/crow.svg'
-import pandaImg from '/pets/panda.svg'
+import type {Pet } from '../types/pet.ts'
+import { createPet } from '../types/pet.ts'
 
-const petTypes = {
-    crow: {
-        name: 'Crow',
-        image: crowImg,
-
-        hungerDecay: 1,
-        happinessDecay: 0.5,
-        hygieneDecay: 0.8
-    },
-
-    panda: {
-        name: 'Panda',
-        image: pandaImg,
-
-        hungerDecay: 0.8,
-        happinessDecay: 0.7,
-        hygieneDecay: 0.6
-    }
-}
-
-type PetType = keyof typeof petTypes
 
 export const usePetStore = defineStore('pet', {
     state: () => ({
-        petTypes,
-        
-        pet: {
-            type: 'crow' as PetType,
-            hunger: 90,
-            happiness: 80,
-            hygiene: 70
-        }
+        pet: createPet() as Pet
 
     }),
-    actions: {
-        tick() {
-            const type = this.petTypes[this.pet.type]
+    getters: {
+        petHunger: (state) => {
+            return state.pet.stats.hunger
+        },  
+        
+        petHappiness: (state) => {
+            return state.pet.stats.happiness
+        },
 
-            this.pet.hunger -= type.hungerDecay
-            this.pet.happiness -= type.happinessDecay
-            this.pet.hygiene -= type.hygieneDecay
-            
-            // Ensure stats don't go below 0
-            this.pet.hunger = Math.max(this.pet.hunger, 0)
-            this.pet.happiness = Math.max(this.pet.happiness, 0)
-            this.pet.hygiene = Math.max(this.pet.hygiene, 0)
+        petHygiene: (state) => {
+            return state.pet.stats.hygiene
+        },
+    },
+
+    actions: {
+        setPetName(name: string) {
+            this.pet.name = name
+        },
+
+        updateHunger(hunger: number) {
+            this.pet.stats.hunger = Math.min(Math.max(0, this.pet.stats.hunger + hunger), 100)
+        },
+
+        updateHappiness(happiness: number) {
+            this.pet.stats.happiness = Math.min(Math.max(0, this.pet.stats.happiness + happiness), 100)
+        },
+
+        updateHygiene(hygiene: number) {
+            this.pet.stats.hygiene = Math.min(Math.max(0, this.pet.stats.hygiene + hygiene), 100)
+        },
+
+        decayPetStats(){
+            let newHunger = -this.pet.type.decayRates.hunger
+            let newHappiness = -this.pet.type.decayRates.happiness
+            let newHygiene = -this.pet.type.decayRates.hygiene
+
+            this.updateHunger(newHunger)
+            this.updateHappiness(newHappiness)
+            this.updateHygiene(newHygiene)
         }
     }
+
 })

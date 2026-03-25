@@ -1,16 +1,12 @@
 <template>
     <div class="login-page">
-        <LoginForm @login-success="goToPet"/>
+        <LoginForm @login-success="login()"/>
     </div>
 </template>
 
 <script setup lang="ts">
 import LoginForm from '../components/LoginForm.vue'
-import {useRouter} from 'vue-router'
+import { useNavigation } from '../composables/navigation.ts';
 
-const router = useRouter()
-
-function goToPet(){
-    router.push('/pet')
-}   
+const {login} = useNavigation()
 </script>

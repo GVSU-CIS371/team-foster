@@ -1,23 +1,24 @@
 <template>
     <div class="pet-card">
-        <h2>{{ type.name }}</h2>
-        <img :src="type.image" alt="type.name" class="pet-image"/>
+        <h1>{{ pet.name }}</h1>
+        <h2>{{ pet.type.name }}</h2>
+        <img :src="pet.type.image" alt="type.name" class="pet-image"/>
         <div class="pet-hunger">
             <PetStat>
                 <template #stat-name>Hunger 🍗: </template>
-                <template #stat-value>{{ pet.hunger.toFixed(0) }}</template>
+                <template #stat-value>{{ pet.stats.hunger.toFixed(0) }}</template>
             </PetStat>
         </div>
         <div class="pet-happiness">
             <PetStat>
                 <template #stat-name>Happiness 🙂: </template>
-                <template #stat-value>{{ pet.happiness.toFixed(0) }}</template>
+                <template #stat-value>{{ pet.stats.happiness.toFixed(0) }}</template>
             </PetStat>
         </div> 
         <div class="pet-hygiene">
             <PetStat>
                 <template #stat-name>Hygiene 🛁: </template>
-                <template #stat-value>{{ pet.hygiene.toFixed(0) }}</template>
+                <template #stat-value>{{ pet.stats.hygiene.toFixed(0) }}</template>
             </PetStat>
         </div>
     </div>
@@ -25,11 +26,9 @@
 
 <script setup lang="ts">
     import PetStat from './PetStat.vue'
-    import { usePetStore } from '../stores/petStore';
+    import { useGameStore } from '../../stores/gameStore';
 
-    const petStore = usePetStore()
+    const gameStore = useGameStore()
 
-    const pet = petStore.pet
-    const type = petStore.petTypes[pet.type]
-    
+    const pet = gameStore.petStore.pet
 </script>
