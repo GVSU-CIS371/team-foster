@@ -1,6 +1,5 @@
 import { defineStore} from 'pinia'
 import type { Player } from '../types/player.ts'
-import { createPlayer } from '../types/player.ts'
 
 export const usePlayerStore = defineStore('player', {
     state: () => ({
