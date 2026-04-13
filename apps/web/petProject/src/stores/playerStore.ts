@@ -15,23 +15,30 @@ export const usePlayerStore = defineStore('player', {
             this.player = player
         },
 
-        addItemToInventory(item: any) {
-            const existingItem = this.player?.inventory.items.find(i => i.item.id === item.id)
+        addItemToInventory(itemID: string) {
+            const existingItem = this.player?.inventory?.items[itemID]
             if (existingItem) {
                 existingItem.quantity += 1
             } else {
-                this.player?.inventory.items.push({item: item, quantity: 1})
+                this.player!.inventory!.items[itemID] = {itemID: itemID, quantity: 1, userID: this.player?.id!}
             }
         },
 
-        removeItemFromInventory(item: any) {
-            const existingItem = this.player?.inventory.items.find(i => i.item.id === item.id)
+        removeItemFromInventory(itemID: string) {
+            const existingItem = this.player?.inventory?.items[itemID]
+
             if (existingItem) {
                 existingItem.quantity -= 1
                 if (existingItem.quantity <= 0 && this.player) {
-                    this.player.inventory.items = this.player.inventory.items.filter(i => i.item.id !== item.id)
+                   delete this.player!.inventory!.items[itemID] 
                 }
+            } else {
+                console.log("item not found in inventory")
             }
+        },
+
+         income(multiplier: number = 1){
+            this.player!.currency += 100 * multiplier
         }
     }
 })

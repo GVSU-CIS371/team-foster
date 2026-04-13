@@ -20,7 +20,7 @@ const {name, data} = defineProps<{
 const gameStore = useGameStore()
 
 function useItem() {
-    gameStore.useItem(data)
+    gameStore.useItem(data.itemID)
 }
 
 </script>

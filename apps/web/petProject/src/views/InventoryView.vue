@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import InventoryCard from '../components/inventory/InventoryCard.vue';
+// import InventoryCard from '../components/inventory/InventoryCard.vue';
 import NavBar from '../components/navigation/NavBar.vue';
 import PetWidget from '../components/pet/PetStatWidget.vue';
-import { usePlayerStore } from '../stores/playerStore';
+//import { usePlayerStore } from '../stores/playerStore';
 
-const playerStore = usePlayerStore();
-const inventory = playerStore.player?.inventory.items ?? []
+//const playerStore = usePlayerStore();
+//const inventory = playerStore.player?.inventory?.items ?? {}
 </script>
 
 <template>
@@ -13,12 +13,12 @@ const inventory = playerStore.player?.inventory.items ?? []
         <h1>Inventory View</h1>
         <NavBar/>
         <PetWidget/>
-        <InventoryCard
+<!--         <InventoryCard
             v-for="item in inventory"
             :key="item.item.id"
             :name="item.item.name"
             :data="item"
-        />
+        /> -->
 
     </div> 
 </template>

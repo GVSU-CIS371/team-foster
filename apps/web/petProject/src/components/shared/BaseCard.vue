@@ -2,13 +2,8 @@
     <div class="card">
         <h2 class="card-title">{{ name ?? 'Card' }}</h2>
         <div v-for="(value, key) in data" :key="key" class="card-data" id="`${data.TypeName ?? 'unknown'}-${data.name ?? key}`">
-            <div v-for="(nestedval, nestedkey) in value" v-if="typeof value === 'object'"
-            :key="nestedkey" class="card-nested-data" id="`${data.TypeName ?? 'unknown'}-${data.name ?? key}-${nestedkey}`">
-                <strong>{{ nestedkey }}:</strong> {{ nestedval }}
-            </div>
-            <div v-else>
-                <strong>{{ key }}:</strong> {{ value }}
-            </div>
+              <strong>{{ key }}:</strong> {{ value }}
+        
 
         </div>
         <slot></slot>

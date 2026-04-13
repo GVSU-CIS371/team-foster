@@ -1,14 +1,14 @@
 import {defineStore} from 'pinia'
-import type { ShopItem } from '../types/shop.ts'
-import { testShopItems } from '../types/mockData.ts'
+import type { Shop } from '../types/shop.ts'
+//import { testShopItems } from '../types/mockData.ts'
 
 export const useShopStore = defineStore('shop', {
     state: () => ({
-        items: testShopItems as Record<string, ShopItem>
+        shop: null as Shop | null,
     }),
     getters: {
         shopItems: (state) => {
-            return state.items
+            return state.shop?.items || []
         }
     },
 })

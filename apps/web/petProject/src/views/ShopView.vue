@@ -17,8 +17,7 @@ const shopItems = gameStore.shopStore.shopItems ?? []
 
         <ShopCard
             v-for="sItem in shopItems"
-            :key="sItem.item.id"
-            :name="sItem.item.name"
+            :key="sItem.itemID"
             :data="sItem"
         />
     </div>

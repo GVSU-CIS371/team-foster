@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import BaseButton from '../shared/BaseButton.vue';
-import { useNavigation } from '../../composables/navigation';
+import { useNavigation } from '../../utilities/navigation';
 
 const props = defineProps<{
     text: string;

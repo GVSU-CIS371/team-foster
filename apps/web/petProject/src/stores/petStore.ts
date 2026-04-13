@@ -1,11 +1,14 @@
 import { defineStore } from 'pinia'
-import type {Pet } from '../types/pet.ts'
+import type {Pet, PetType } from '../types/pet.ts'
 import { createPet } from '../types/pet.ts'
 
 
 export const usePetStore = defineStore('pet', {
     state: () => ({
-        pet: createPet() as Pet
+        pet: createPet() as Pet,
+        petTypes: {} as Record <string, PetType>,
+
+
 
     }),
     getters: {
@@ -28,6 +31,7 @@ export const usePetStore = defineStore('pet', {
         },
 
         updateHunger(hunger: number) {
+            console.log("update pet hunger")
             this.pet.stats.hunger = Math.min(Math.max(0, this.pet.stats.hunger + hunger), 100)
         },
 
@@ -39,10 +43,14 @@ export const usePetStore = defineStore('pet', {
             this.pet.stats.hygiene = Math.min(Math.max(0, this.pet.stats.hygiene + hygiene), 100)
         },
 
-        decayPetStats(){
-            let newHunger = -this.pet.type.decayRates.hunger
-            let newHappiness = -this.pet.type.decayRates.happiness
-            let newHygiene = -this.pet.type.decayRates.hygiene
+        decayPetStats(multiplier: number = 1){ 
+            let typeID = this.pet.typeID
+            console.log("Decaying pet stats for typeID:", typeID)
+
+            let petType = this.petTypes[this.pet.typeID]!
+            let newHunger = -petType.decayRates.hunger * multiplier
+            let newHappiness = -petType.decayRates.happiness * multiplier
+            let newHygiene = -petType.decayRates.hygiene * multiplier
 
             this.updateHunger(newHunger)
             this.updateHappiness(newHappiness)

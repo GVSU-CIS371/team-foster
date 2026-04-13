@@ -17,3 +17,14 @@ function handleClick() {
     emit('click');
 }
 </script>
+
+<style scoped>
+.base-button{
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+</style>

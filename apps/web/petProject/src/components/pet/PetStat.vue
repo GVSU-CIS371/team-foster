@@ -4,3 +4,9 @@
         <slot name="stat-value"></slot>
     </div>
 </template>
+
+<style scoped>
+.pet-stat{
+    font-size: 150%;
+}
+</style>

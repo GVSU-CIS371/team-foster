@@ -11,6 +11,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+    scrollbar-width: none;
+    width: 100vw;
+
 }
 
 a {
@@ -26,9 +29,12 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
 }
+
 
 h1 {
   font-size: 3.2em;
@@ -58,11 +64,17 @@ button:focus-visible {
   padding: 2em;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+#app {  
   text-align: center;
+  width: 100%;
+  height: 100%;
+  padding: .75rem;
+  align-items: center;
+  align-content: center;
+}
+
+.v-btn, .base-button{
+  background-color: green;
 }
 
 @media (prefers-color-scheme: light) {

@@ -1,4 +1,4 @@
-import { createPetType, createPetStats } from './pet.ts'
+/*import { createPetType, createPetStats } from './pet.ts'
 import { createPlayer } from './player.ts'
 import { createItem } from './inventory.ts'
 import { createShop, createShopItem } from './shop.ts'
@@ -7,19 +7,6 @@ import { createShop, createShopItem } from './shop.ts'
 const crowImg = '../assets/pets/crow.svg'
 const pandaImg = '../assets/pets/panda.svg'
 
-const testPetTypes = {
-    crow: createPetType({
-        name: 'Crow',
-        image: crowImg,
-        decayRates: createPetStats({hunger: 1, happiness: 2, hygiene: 3})
-    }),
-
-    panda: createPetType({
-        name: 'Panda',
-        image: pandaImg,
-        decayRates: createPetStats({hunger: 3, happiness: 1, hygiene: 2})
-    })
-} as const
 
 const testPlayer = createPlayer()
 
@@ -32,12 +19,12 @@ const testItems = {
 } as const
 
 const testShopItems = {
-    testSFood: createShopItem({item: testItems.testFood}),
-    testSToy: createShopItem({item: testItems.testToy}),
-    testSHygiene: createShopItem({item: testItems.testHygiene})
+    testSFood: createShopItem({item: testItems.testFood.id}),
+    testSToy: createShopItem({item: testItems.testToy.id}),
+    testSHygiene: createShopItem({item: testItems.testHygiene.id})
 } as const
 
 testShop.items.push(testShopItems.testSFood, testShopItems.testSToy, testShopItems.testSHygiene)
-testPlayer.inventory.items.push({item: testItems.testFood, quantity: 2}, {item: testItems.testToy, quantity: 1})
+testPlayer.inventory?.items.push({itemID: testItems.testFood.id, quantity: 2, userID: "test"}, {itemID: testItems.testToy.id, quantity: 1, userID: "test"})
 
-export { testPetTypes, testShopItems, testItems, testPlayer, testShop };
+export {  testShopItems, testItems, testPlayer, testShop };*/
