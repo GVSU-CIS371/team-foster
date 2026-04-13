@@ -111,29 +111,29 @@
     margin: auto 0;
         display:flex;
     flex-direction: column;
-    gap: 1em;
+    gap: 1rem;
 }
 
 .subtitle {
-    font-size: 1em;
-    padding: 0 0 0 2em;
+    font-size: 1rem;
+    padding: 0 0 0 2rem;
 }
 
 .title{
-    font-size: 2em;
-    padding: 0.5em 1em;
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
 }
 
 .shop-items{
-    gap: 1em;
+    gap: 1rem;
 }
 
 .item-image{
-    font-size: 3em;
+    font-size: 3rem;
 }
 
 .shop-content{
-    margin: 1em;
+    margin: 1rem;
 }
 
 .pet-page{

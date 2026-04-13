@@ -1,10 +1,10 @@
 <template>
     <div class="create-pet-form">
-        <h1>Create Pet</h1>
+
         <div class="pet-type-card">
             <PetTypeCard :petType="currentPetType" @prev-pet="prevPet" @next-pet="nextPet"/>
         </div>
-        <p>Name: <input v-model="petName" placeholder="Pet Name"></p>
+        <p class="name-input">Name: <input v-model="petName" placeholder="Pet Name"></p>
         <div class="create-pet-button">
         <button @click="createPet">Create</button>
         </div>
@@ -75,18 +75,18 @@ const nextPet = () => {
 
 <style scoped>
  .create-pet-form {
-    background-color: yellow;
-    width: 50%;
-    height: 100%;
-    flex: 1;
-    justify-items: center;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
+    gap: 16px;
+}
+
+.name-input {
+    padding: 1em 0 0 0;
+}
+
+.name-input input {
+    background-color: black;
 }
 
 .pet-type-card {
-    background-color: green;
     width: 100%;
     height: 100%;
     display: flex;

@@ -2,10 +2,14 @@
     <div class="pet-type-cards" @click="handleClick">
         <v-window :key="petType.id">
             <v-window-item  class="pet-type-card">
-                <v-card>
-                    <v-card-title class="text-center">{{ petType.name }}</v-card-title>
-                    <v-card-text class="text-center">{{ petType.image }}</v-card-text>
-                     <v-card-text class ="text-center">
+
+                    <v-card-title class="pet-name">{{ petType.name }}</v-card-title>
+                    <div class="middle">
+                    <div class="prev-arrow"><</div>
+                    <v-card-text class="pet-type-image">{{ petType.image }}</v-card-text>
+                    <div class="next-arrow">></div>
+                    </div>
+                     <v-card-text class ="decay-stats">
                         <p>Decay Rates</p>
                         <div class="pet-stats">
                         <PetStat>
@@ -22,7 +26,7 @@
                         </PetStat>
                         </div>
                     </v-card-text>
-                </v-card>
+
             </v-window-item>
         </v-window>
     </div>
@@ -59,27 +63,59 @@ import PetStat from './PetStat.vue'
 
 <style scoped>
 
-.pet-type-cards {
-    background-color: blue;
-    height: 100%;
-    width: 100%;
+.pet-type-head {
+    display: inline flex;
+    gap: 10rem;
+}
+
+.prev-arrow, .next-arrow {
+    font-size: clamp(5em, 5vw, 10em);
+}
+
+.middle{
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
+    gap: 2rem;
+}
 
+.pet-type-cards {
+    width: 100%;
+    max-width: 50rem;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 1rem;
+    box-sizing: border-box;
+
+    border: 3px solid white;
+    border-radius: 30px;
+}
+
+.pet-name {
+    font-size: 250%;
+} 
+
+.pet-type-image{
+    font-size: clamp(15rem, 10vw, 30rem);
+}
+.decay-stats{
+    font-size: 1rem;
 }
 
 .pet-stats{
     display: inline-flex;
     align-items: space-around;
-     justify-content: space-around;
-     width: 75%;
-}
-
-.carousel-item{
-    background-color: orange;
+    gap: 1rem;
+    width: 75%;
 
 }
+
 
 .carousel-controls{
     position: absolute;
@@ -88,30 +124,15 @@ import PetStat from './PetStat.vue'
 }
 
 .prev{
-    background-color: red;
     width: 50%;
     height: 100%;
     background: transparent;
 }
 
 .next{
-    background-color: orange;
     width: 50%;
     height: 100%;
     background: transparent;
 }
-
-
-.v-card{
-    background-color: purple;
-    height: 100%;
-}
-
-.v-carousel-item{
-    background-color: red;
-
-}
-
-
 
 </style>

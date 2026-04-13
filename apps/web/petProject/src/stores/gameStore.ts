@@ -6,8 +6,7 @@ import { createPet, createPetStats, toPetType, toPet, toDbPet} from '../types/pe
 import type { dbPet, dbPetType} from '../types/pet.ts'
 import type { dbPlayer } from '../types/player.ts'
 import { toPlayer, createDbPlayer, toDbPlayer} from '../types/player.ts'
-import type{ } from '../types/inventory.ts'
-import { toInventory, toItem, toInventoryItem, toDbInventoryItem, toDbInventory } from '../types/inventory.ts'
+import { toInventory, toItem, toInventoryItem, toDbInventoryItem, toDbInventory, createInventory } from '../types/inventory.ts'
 import { toShop, toShopItem } from '../types/shop.ts'
 import type { dbShop, ShopItem, dbShopItem } from '../types/shop.ts'
 import type { Item, dbInventory, dbItem, dbInventoryItem } from '../types/inventory.ts'
@@ -240,6 +239,9 @@ export const useGameStore = defineStore('game', {
                         }
 
                         console.log("Player Inventory: ", this.playerStore.player.inventory)
+                    } else {
+                        this.playerStore.player.inventory = createInventory({id: userID})
+                        addNamedDocument(CollectionNames.Inventories, userID, toDbInventory(this.playerStore.player.inventory))
                     }
                 }
 

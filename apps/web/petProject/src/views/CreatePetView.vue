@@ -1,7 +1,12 @@
 <template>
     <div class="create-pet-page">
+   
+        <div class="pet-page">
+        <h1>Create Pet</h1>
         <CreatePetForm @pet-created="goToPet()"/>
         <NavigationButton to="logout" text="Logout" />
+        </div>  
+
     </div>
 </template>
 
@@ -16,12 +21,18 @@ const { goToPet } = useNavigation()
 <style scoped>
 
 .create-pet-page{
-    background-color: pink;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin: auto 0;
+
+}
+
+
+.pet-page{
+    margin: auto 0;
 }
 
 </style>
