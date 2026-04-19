@@ -1,7 +1,7 @@
 //
 //  PetView.swift
 //  petProject
-//
+//  iOS
 //  Created by Aaron Foster on 3/1/26.
 //
 
@@ -31,7 +31,7 @@ struct PetView: View{
     }
     
     var petImage: String {
-        vm.petTypes[typeID]!.image
+        vm.petTypes[typeID]?.image ?? "⁉️"
     }
     
     
@@ -67,7 +67,7 @@ struct PetView: View{
             HStack{
  
                 VStack{
-                    Text(vm.petTypes[typeID]?.image ?? "Missing").font(.system(size: 330))
+                    Text(petImage).font(.system(size: 330))
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 

@@ -9,10 +9,11 @@ import SwiftUI
 
 @main
 struct petProject_Watch_AppApp: App {
+    @StateObject var vm = PetViewModel(dbUtil: DBUtilitiesWatch(), authStatus: AuthServiceWatch.shared)
     init(){
-        let cm = ConnectionManager.shared
+        //let cm = ConnectionManager.shared
         
-        cm.register(event:"login") { message in
+        /*cm.register(event:"login") { message in
             print("Login Received Watch")
         }
         
@@ -35,12 +36,12 @@ struct petProject_Watch_AppApp: App {
         cm.register(event: "get") { message in
             print("Get Received Watch \(message)")
             
-        }
+        }*/
     }
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().environmentObject(vm)
         }
     }
 }

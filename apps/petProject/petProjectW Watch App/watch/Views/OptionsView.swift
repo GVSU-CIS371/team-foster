@@ -8,10 +8,17 @@
 import SwiftUI
 
 struct OptionsView: View {
+    private var onLogout: () -> Void
     
-    init(){}
+    init(onLogout: @escaping () -> Void){
+        self.onLogout = onLogout
+    }
     
     var body: some View{
         Text("Options")
+        
+        Button("Logout"){
+            self.onLogout()
+        }.padding().clipShape(Capsule()).border(Color.white)
     }
 }

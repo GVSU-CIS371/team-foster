@@ -21,6 +21,8 @@ class ConnectionUtilsIOS: ConnectionUtilities {
         }
     }
     
+    
+    
     func updateConnectionHandler(data: [String: Any]){
         switch data.first!.key {
         case "pet":

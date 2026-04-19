@@ -15,6 +15,7 @@ struct dbPlayer: Codable {
     var lastUpdate: Date
 }
 
+
 class Player: Identifiable, Codable{
     var id: String
     var username: String
@@ -30,7 +31,7 @@ class Player: Identifiable, Codable{
         case lastUpdate = "last_update"
     }
     
-    init(id: String = "test id", username: String = "Test Player", pet: Pet? = nil, inventory: Inventory? = nil, currency: Int = 1000, lastUpdate : Date = Date())
+    init(id: String = "test id", username: String = "", pet: Pet? = nil, inventory: Inventory? = nil, currency: Int = 1000, lastUpdate : Date = Date())
     {
         self.id = id
         self.username = username

@@ -13,71 +13,81 @@ enum AuthStatus: Error {
     case failure
 }
 
-extension AuthService {
-    func login(username: String, password: String) async throws -> [String: Any] {
-        try await withCheckedThrowingContinuation{ continuation in
-            ConnectionManager.shared.send(message: [ConnectionEventType.event.rawValue:"login"], replyHandler: { (reply) in
-                if let status = reply["status"] as? String, status == "success"{
-                    print("Login Received From iOS")
-                    let userID = self.userID ?? "Default"
-                    continuation.resume(returning: reply)
-                }
-                else{
-                    continuation.resume(throwing: AuthStatus.failure)
-                }
-            })
-        
-        }
-    }
-}
-
 class AuthServiceWatch: ObservableObject, AuthService{
-    required init() {
-        <#code#>
-    }
-    
-    func logout() async {
-        <#code#>
-    }
-    
-    func update() async {
-        <#code#>
-    }
-    
-    func newUser(email: String, password: String) async -> Result<String, any Error> {
-        <#code#>
-    }
-    
-    var userID: String? = "Default"
-    
-    var loggedIn: Bool
-        
-    func login(email: String, password: String) async -> Result<String, any Error> {
+    static var shared: AuthServiceWatch = AuthServiceWatch()
 
-    
-    static var shared: AuthServiceWatch = .init()
+    var userID: String? = "Default"
+    var username: String? = nil
     var loggedIn: Bool
-    var lastLogin: Date?
+
+    private let cm: ConnectionManager
     
-    required init() {
+    required init(cm: ConnectionManager = .shared) {
         self.loggedIn = false
-        self.lastLogin = nil
+        self.cm = cm
+        
+        cm.registerData(type: LoginData.self) { data, action, reply in
+            print("Login received to watch from phone")
+            print(data)
+            print(reply)
+            
+        }
         
     }
     
-    func login (username: String, password: String, loggedIn: @escaping (Result<Bool, Error>) -> Void) {
+    func login(email: String, password: String) async -> Result<String, Error>{
+        
+        return await withCheckedContinuation{ continuation in
+ 
+            let username = String(email.split(separator: "@").first ?? "")
+            let loginData = LoginData(id: "testID", email: email, password: password, username: username)
+            
+            self.cm.sendData(data: loginData, action: ConnectionManager.ActionType.login) { reply in
+                guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply) else {
+                    print("reply not received from phone to watch")
+                    continuation.resume(returning: .failure(AuthStatus.failure))
+                    return
+                }
+                guard let decoded = try? JSONDecoder().decode(LoginData.self, from: response.payload)
+                else {
+                    print("reply not decoded from phone to watch")
+                    continuation.resume(returning: .failure(AuthStatus.failure))
+                    return
+                }
+                self.userID = decoded.id
+                self.username = decoded.username
+                self.loggedIn = true
+                print("login authservicewatch", decoded.username)
+                print("login authservicewatch", decoded.id)
+                
+                continuation.resume(returning: .success(self.userID ?? "no user id"))
+                }
+            }
         
     }
+    
     
     func newUser(email: String, password: String) async -> Result<String, any Error> {
         print("new user")
-        return .success("")
+        let response = await login(email: email, password: password)
+        
+        return response
+        
     }
-    
-    var userID: String?
-    
-    func logout() {
+        
+    func logout() async {
         print("logout")
+        return await withCheckedContinuation{ continuation in
+            let loginData = LoginData(id:"", email: "", password: "")
+            self.cm.sendData(data: loginData, action: ConnectionManager.ActionType.logout) {reply in
+            self.userID = nil
+            self.username = nil
+            self.loggedIn = false
+            print("LOGOUT COMPLETE")
+            continuation.resume()
+        }
+            
+        }
     }
 
     

@@ -21,6 +21,288 @@ extension DBError {
 
 class DBUtilitiesIOS: DBUtilities {
     
+    private var cm: ConnectionManager
+    
+    init(cm: ConnectionManager = .shared){
+        self.cm = cm
+        
+        
+        cm.registerData(type: Player.self){data, action, reply  in
+            print("Player")
+            let userID = data.id
+            let username = data.username
+            
+            switch action {
+            case .get:
+                Task{@MainActor in
+                    do{
+                        let player = try await self.getPlayer(userID: userID)
+                        
+                        reply(player)
+                    } catch(let error) {
+                        print("failed ", error)
+                        
+                        switch error as? DBError {
+                        case .notFound:
+                            await self.addPlayer(userID: userID, username: username)
+                            let player = try await self.getPlayer(userID: userID)
+                            reply(player)
+                            
+                        default:
+                            break
+                        }
+                    }
+                }
+            case .add:
+                Task{@MainActor in
+
+                    do{
+                        await self.addPlayer(userID: userID, username: username)
+
+                        let player = try await self.getPlayer(userID: userID)
+                        
+                        reply(player)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            case .update:
+                Task{@MainActor in
+                    do{
+                        print("UPDATE PLAYER ON WATCH FROM PHONE")
+                        try await self.updatePlayer(userID: userID, player: data)
+                        
+                        reply(data)
+                        
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            default:
+                break
+            }
+        }
+        cm.registerData(type: Pet.self){data, action, reply in
+            print("Pet")
+            switch action {
+            case .get:
+                Task {@MainActor in
+                    do{
+                        let pet = try await self.getPet(userID: data.id!)
+                        reply(pet)
+                    } catch (let error){
+                        print("ERROR GETTING PET FOR WATCH", error)
+                        let errorPet = Pet(id: "error")
+                        print("ERROR PET", errorPet)
+                        reply(errorPet)
+                    }
+                }
+            case .add:
+                Task{@MainActor in
+                    do{
+                        await self.addPet(userID: data.id!, name: data.name, typeID: data.typeID)
+                        let pet = try await self.getPet(userID: data.id!)
+                        reply(pet)
+                    } catch(let error) {
+                        print(error)
+                        let errorPet = Pet(id: "error")
+                        print("ERROR PET", errorPet)
+                        reply(errorPet)
+                    }
+                }
+                
+            case .update:
+                Task{@MainActor in
+                    do{
+                        print("UPDATE PET ON WATCH FROM PHONE")
+                        try await self.updatePet(userID: data.id!, pet: data)
+                        reply (data)
+                    } catch(let error){
+                        print(error)
+                    }
+                }
+            default:
+                break
+            }
+        }
+        cm.registerData(type: Inventory.self){data, action, reply in
+            print("Inventory")
+            switch action {
+            case .get:
+                Task{@MainActor in
+                    let inventory = try await self.getInventory(userID: data.id)
+                    reply(inventory)
+                }
+            case .add:
+                Task{@MainActor in
+                    do{
+                        await self.addInventory(userID: data.id)
+                        let inventory = try await self.getInventory(userID: data.id)
+                        reply(inventory)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            case .update:
+                Task{@MainActor in
+                    do{
+                        try await self.updateInventory(userID: data.id, inventory: data)
+                    } catch(let error){
+                        print(error)
+                    }
+                }
+                
+            default:
+                break
+            }
+        }
+        cm.registerData(type: Shop.self){data, action, reply in
+             print("Shop")
+            switch action {
+            case .get:
+                Task{@MainActor in
+                    do{
+                        let shop = try await self.getShop()
+                        print(shop)
+                        reply(shop)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            case .add:
+                Task{@MainActor in
+                    do{
+                        await self.addShop(name: data.name)
+                        let shop = try await self.getShop()
+                        print(shop)
+                        reply(shop)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+                
+            case .update:
+                Task{@MainActor in
+                    do{
+                        try await self.updateShop(shopID: data.id, shop: data)
+                        reply(data)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            default:
+                break
+            }
+        }
+        cm.registerData(type: [String:ShopItem].self){data, action, reply in
+            print("ShopItem")
+            switch action {
+            case .get:
+                Task{@MainActor in
+                    do{
+                        let shopItems = try await self.getShopItems(name: data.values.first!.shopID)
+                        reply(shopItems)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+                
+            case .update:
+                Task{@MainActor in
+                    do{
+                        try await self.updateShopItem(shopItem: data.values.first!)
+                        reply(data)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            default:
+                break
+            }
+        }
+        cm.registerData(type: [String:InventoryItem].self) { data, action, reply in
+            print("Inventory Items")
+            switch action{
+            case .get:
+                Task{@MainActor in
+                    do{
+                        let inventoryItems = try await self.getInventoryItems(userID: data.values.first!.userID)
+                        
+                        reply(inventoryItems)
+                    } catch (let error) {
+                        print(error)
+                    }
+                }
+            default:
+                
+                break
+            }
+        }
+        cm.registerData(type: InventoryItem.self){data, action, reply in
+            print("InventoryItem")
+            switch action {
+            case .get:
+                Task{@MainActor in
+                    
+                        do {
+                            let listOfItems = try await self.getInventoryItems(userID: data.userID)
+                            let inventoryItem = listOfItems[data.id]!
+                            reply(inventoryItem)
+                        } catch(let error) {
+                            print(error)
+                        }
+                    
+                }
+            case .update:
+                Task{@MainActor in
+                    do{
+                        try await self.updateInventoryItem(invItem: data)
+                        reply(data)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            default:
+                break
+            }
+        }
+        cm.registerData(type: [String:Item].self) {data, action, reply in
+            print("Item")
+            switch action {
+            case .get:
+                Task{@MainActor in
+                    do{
+                        let items = try await self.getItems()
+                        reply(items)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+           
+            default:
+                break
+            }
+        }
+        cm.registerData(type: [String: PetType].self) {data, action, reply in
+            print("PetTypes")
+            switch action {
+            case .get:
+                Task{@MainActor in
+                    do{
+                        let petTypes = try await self.getPetTypes()
+                        reply(petTypes)
+                    } catch(let error) {
+                        print(error)
+                    }
+                }
+            
+            default:
+                break
+            }
+        }
+        
+        
+    }
     
     func getItems() async throws -> [String : Item] {
         let collectName = CollectionNames.items.rawValue
@@ -55,21 +337,55 @@ class DBUtilitiesIOS: DBUtilities {
     
     
     func updatePlayer(userID: String, player: Player) async throws{
+        print("UPDATE PLAYER")
         let collectName = CollectionNames.users.rawValue
         player.lastUpdate = Date()
         await DBService.shared.updateNamedDoc(collectName: collectName, docName: userID, data: player)
+        
+        //return try await withCheckedThrowingContinuation{ continuation in
+            //print("SENDING TO WATCH")
+            cm.sendData(data: player, action: .update){ reply in
+                print("update player")
+                guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
+                      let decoded = try? JSONDecoder().decode(Player.self, from: response.payload) else {
+                    print("problem updating watch of player changes")
+                    return }
+                print(decoded)
+                //continuation.resume(returning: ())
+            }
+        //}
     }
     
     func updatePet(userID: String, pet:Pet) async throws {
         let collectName = CollectionNames.pets.rawValue
         pet.lastUpdate = Date()
         await DBService.shared.updateNamedDoc(collectName: collectName, docName: userID, data: pet)
+        
+        cm.sendData(data: pet, action: .update){ reply in
+            print("update pet")
+            guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
+                  let decoded = try? JSONDecoder().decode(Pet.self, from: response.payload) else {
+                print("problem updating watch of pet changes")
+                return }
+            print(decoded)
+            //continuation.resume(returning: ())
+        }
     }
     
     func updateInventory(userID: String, inventory: Inventory) async throws{
         let collectName = CollectionNames.inventories.rawValue
         inventory.lastUpdate = Date()
         await DBService.shared.updateNamedDoc(collectName: collectName, docName: userID, data: inventory)
+        
+        cm.sendData(data: inventory, action: .update){ reply in
+            print("update inventory")
+            guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
+                  let decoded = try? JSONDecoder().decode(Inventory.self, from: response.payload) else {
+                print("problem updating watch of inventory changes")
+                return }
+            print(decoded)
+            //continuation.resume(returning: ())
+        }
     }
     
     func updateInventoryItem(invItem: InventoryItem) async throws{
@@ -78,6 +394,16 @@ class DBUtilitiesIOS: DBUtilities {
         
         if invItem.quantity > 0 {
             await DBService.shared.updateDoc(collectName: collectName, data: invItem, filters: filters)
+            
+            cm.sendData(data: invItem, action: .update){ reply in
+                print("update inventory item")
+                guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
+                      let decoded = try? JSONDecoder().decode(InventoryItem.self, from: response.payload) else {
+                    print("problem updating watch of inventory item changes")
+                    return }
+                print(decoded)
+                //continuation.resume(returning: ())
+            }
         } else {
             await DBService.shared.deleteDoc(collectName: collectName, filters: filters)
         }
@@ -88,12 +414,32 @@ class DBUtilitiesIOS: DBUtilities {
         let collectName = CollectionNames.shops.rawValue
         shop.lastUpdate = Date()
         await DBService.shared.updateDoc(collectName: collectName, data: shop, filters: [filters])
+        
+        cm.sendData(data: shopID, action: .update){ reply in
+            print("update shop")
+            guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
+                  let decoded = try? JSONDecoder().decode(Shop.self, from: response.payload) else {
+                print("problem updating watch of shop changes")
+                return }
+            print(decoded)
+            //continuation.resume(returning: ())
+        }
     }
     
     func updateShopItem(shopItem: ShopItem) async throws{
         let filters = [Filter(from: "shop_id", to: shopItem.shopID, op: FilterOperation.EqualTo), Filter(from: "item_id", to: shopItem.id, op: FilterOperation.EqualTo)]
         let collectName = CollectionNames.shop_items.rawValue
         await DBService.shared.updateDoc(collectName: collectName, data: shopItem, filters: filters)
+        
+        cm.sendData(data: shopItem, action: .update){ reply in
+            print("update player")
+            guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
+                  let decoded = try? JSONDecoder().decode(ShopItem.self, from: response.payload) else {
+                print("problem updating watch of player changes")
+                return }
+            print(decoded)
+            //continuation.resume(returning: ())
+        }
     }
     
     func updateFields(collectName: String, userID: String, fields: [String:Any]) async {
@@ -183,6 +529,10 @@ class DBUtilitiesIOS: DBUtilities {
         switch result {
         case .success(let inventoryData):
             inventory = inventoryData
+            
+            let invItems = try await getInventoryItems(userID: inventory.id)
+            
+            inventory.items = invItems
         case .failure(let error):
             print("Error reading document: \(error)")
 
@@ -198,19 +548,23 @@ class DBUtilitiesIOS: DBUtilities {
     }
     
     func getInventoryItems(userID: String) async throws -> [String: InventoryItem] {
-        let collectName = CollectionNames.shop_items.rawValue
-        let path: String = "\(collectName)/\(userID)"
+        let collectName = CollectionNames.inventory_items.rawValue
+        let itemFilter = Filter(from: "user_id", to: userID, op: FilterOperation.EqualTo)
+        //let path: String = "\(collectName)/\(userID)"
         
-        let result: Result<[InventoryItem], Error> = await DBService.shared.readCollection(collectName: path)
+        let result: Result<[InventoryItem], Error> = await DBService.shared.readCollection(collectName: collectName, filters: [itemFilter])
         
         var invItems: [String:InventoryItem] = [:]
-        let baseItems: [String:Item] = try await getItems()
+        //let baseItems: [String:Item] = try await getItems()
+        
+        print("getInventory Items User ID:",userID)
         
         switch result {
         case .success(let invItemData):
+            print("FIRESTORE INV ITEMS:", invItemData)
             invItemData.forEach({ invItem in
-                let item: Item = baseItems[invItem.id]!
-                if item.id == invItem.id && invItem.userID == userID{
+                //let item: Item = baseItems[invItem.id]!
+                if invItem.userID == userID{
                     invItems[invItem.id] = invItem
                 }
             })

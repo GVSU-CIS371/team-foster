@@ -57,11 +57,9 @@ struct InventoryView: View {
                 GeometryReader{geo in
                     HStack {
                         Color.clear.contentShape(Rectangle()).onTapGesture {
-                            print("left")
                             currentIndex = currentIndex > 0 ? currentIndex - 1 : keys.count - 1
                             item = vm.player!.inventory!.items[keys[currentIndex]]
                             currentKey = item!.id
-                            print("\(currentIndex) \(currentKey) \(String(describing: item))")
                         }.frame(width: geo.size.width/2)
                         Spacer()
                     }
@@ -71,11 +69,9 @@ struct InventoryView: View {
                     HStack {
                         Spacer()
                         Color.clear.contentShape(Rectangle()).onTapGesture {
-                            print("right")
                             currentIndex = currentIndex < keys.count - 1 ? currentIndex + 1 : 0
                             item = vm.player!.inventory!.items[keys[currentIndex]]
                             currentKey = item!.id
-                            print("\(currentIndex) \(currentKey) \(String(describing: item))")
                         }.frame(width: geo.size.width/2)
                     }
                 }

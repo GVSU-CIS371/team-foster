@@ -50,7 +50,6 @@ struct Filter {
 }
 
 
-
 protocol DBUtilities {
     func encode<T: Codable>( data: T) throws -> [String: Any]
     func listenToPlayer(userID: String, listened: @escaping (Result<Player, Error>) -> Void) async

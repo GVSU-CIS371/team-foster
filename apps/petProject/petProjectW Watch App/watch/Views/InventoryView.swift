@@ -8,15 +8,21 @@
 import SwiftUI
 
 struct InventoryView: View {
-    @ObservedObject var vm: PetViewModel
+    @EnvironmentObject var vm: PetViewModel
     private var onShop: () -> ()
     @State private var currentIndex: Int = 0
     @State private var currentKey: String = ""
+    @State private var item: InventoryItem? = nil
+
+    var userID: String {
+        vm.player?.id ?? ""
+    }
     
-    @State private var inventory: Inventory = Inventory()
+    var keys: [String] {
+        Array(vm.player!.inventory!.items.keys)
+    }
     
-    init(vm: PetViewModel, onShop: @escaping () -> ()){
-        self._vm = ObservedObject(wrappedValue: vm)
+    init(onShop: @escaping () -> ()){
         self.onShop = onShop
     }
     
@@ -24,45 +30,52 @@ struct InventoryView: View {
         VStack{
             Text("Inventory")
             Spacer()
+            VStack{
             ZStack{
-                let keys = Array(inventory.items.keys)
-
-                if inventory.allItems.isEmpty{
-                    Text("No Items").frame(maxWidth: .infinity, maxHeight: .infinity).background(Color.blue)
-                }
-                else {
-                    TabView(selection: $currentIndex){
+                VStack{
+                    TabView(selection: $currentKey){
                         ForEach(keys, id: \.self){ key in
-                            if let item = vm.items[key] {
-                                VStack{
-                                    Text(item.name)
-                                    Spacer()
-                                    HStack{
-                                        Text(item.type.rawValue)
+                            if let invItem = vm.player?.inventory?.items[key] {
+                                if let iItem = vm.items[invItem.id] {
+                                    VStack{
+                                        Text(iItem.name)
                                         Spacer()
-                                        Text(String(inventory.items[key]!.quantity))
-                                    }.padding(16)
-                                }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    .background(Color.blue).cornerRadius(10).tag(key)
+                                        HStack{
+                                            Text(iItem.type.rawValue)
+                                            Spacer()
+                                            Text(String(invItem.quantity))
+                                        }.padding(16)
+                                    }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .background(Color.blue).cornerRadius(10).tag(key)
+                                }
                             }
                         }
                     }.tabViewStyle(.page)
-                    
+                }
+                
+                GeometryReader{geo in
                     HStack {
                         Color.clear.contentShape(Rectangle()).onTapGesture {
-                            guard let currentIndex = keys.firstIndex(of: currentKey) else {return}
-                            let prevIndex = currentIndex > 0 ? currentIndex - 1 : keys.count - 1
-                            currentKey = keys[prevIndex]
-                        }
+                            currentIndex = currentIndex > 0 ? currentIndex - 1 : keys.count - 1
+                            item = vm.player!.inventory!.items[keys[currentIndex]]
+                            currentKey = item!.id
+                            print("\(currentIndex) \(currentKey) \(String(describing: item))")
+                        }.frame(width: geo.size.width/2)
+                        Spacer()
                     }
-                    
+                }
+                
+                GeometryReader{geo in
                     HStack {
+                        Spacer()
                         Color.clear.contentShape(Rectangle()).onTapGesture {
-                            guard let currentIndex = keys.firstIndex(of: currentKey) else {return}
-                            let prevIndex = currentIndex < keys.count - 1 ? currentIndex + 1 : 0
-                            currentKey = keys[prevIndex]
-                        }
+                            currentIndex = currentIndex < keys.count - 1 ? currentIndex + 1 : 0
+                            item = vm.player!.inventory!.items[keys[currentIndex]]
+                            currentKey = item!.id
+                            print("\(currentIndex) \(currentKey) \(String(describing: item))")
+                        }.frame(width: geo.size.width/2)
                     }
+                }
                 }
             }
             Spacer()
@@ -71,12 +84,7 @@ struct InventoryView: View {
             }
         }.ignoresSafeArea(edges: .bottom)
             .onAppear {
-                if vm.player!.inventory == nil {
-                    Task{@MainActor in
-                        inventory = Inventory(id: vm.player!.id)
-                        vm.player!.inventory = inventory
-                    }
-                }
+                
             }
     }
 }

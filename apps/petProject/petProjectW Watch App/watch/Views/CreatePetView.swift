@@ -9,18 +9,20 @@ import SwiftUI
 
 
 struct CreatePetView: View {
-    @ObservedObject var vm: PetViewModel
+    @EnvironmentObject var vm: PetViewModel
     @State private var petName: String = ""
     @State private var petType: PetType? = nil
+    @State private var selectedType: PetType? = nil
     @State private var currentIndex: Int = 0
     @State private var currentKey: String = ""
+    private var userID: String {
+        vm.player?.id ?? ""
+    }
     
-    private var onPetCreated: () -> Void
+    private var onPetCreated: (String, String) -> Void
     
-    init(vm: PetViewModel, onPetCreated: @escaping () -> Void){
-        self._vm = ObservedObject(wrappedValue: vm)
+    init(onPetCreated: @escaping (String, String) -> Void){
         self.onPetCreated = onPetCreated
-        self._petType = .init(initialValue: vm.petTypes.first?.value)
     }
     
     var body: some View {
@@ -28,70 +30,100 @@ struct CreatePetView: View {
             Text("New Pet")
             Spacer()
             
-            if petType == nil {
-                ZStack{
+            VStack(){
+                if selectedType == nil {
                     let keys = Array(vm.petTypes.keys)
                     
-                    VStack{
-                        TabView(selection: $currentKey){
-                            ForEach(keys, id: \.self){ key in
-                                if let type = vm.petTypes[key] {
-                                    VStack{
-                                        Text(type.name)
-                                        Spacer()
-                                        Text(type.image)
-                                    }.padding(.bottom, 16).padding(.horizontal, 16).frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        .background(Color.blue).cornerRadius(10).tag(key)
+                    ZStack{
+                        VStack{
+                            TabView(selection: $currentKey){
+                                ForEach(keys, id: \.self){ key in
+                                    if let type = vm.petTypes[key] {
+                                        VStack{
+                                            Text(type.name)
+                                            Spacer()
+                                            Text(type.image).font(Font.largeTitle.bold())
+                                            Spacer()
+                                        }.padding(.bottom, 16).padding(.horizontal, 16).frame(maxWidth: .infinity, maxHeight: .infinity)
+                                            .background(Color.blue).cornerRadius(10).tag(key)
+                                    }
+                                }
+                            }.tabViewStyle(.page)
+                        }
+                        
+                        
+                        GeometryReader{geo in
+                            HStack {
+                                Color.clear.contentShape(Rectangle()).onTapGesture {
+                                    print("left")
+                                    currentIndex = currentIndex > 0 ? currentIndex - 1 : keys.count - 1
+                                    petType = vm.petTypes[keys[currentIndex]]
+                                    currentKey = petType!.id
+                                }.frame(width: geo.size.width/2)
+                                Spacer()
+                            }
+                        }
+                        
+                        GeometryReader{geo in
+                            HStack {
+                                Spacer()
+                                ZStack{
+                                    Color.clear.contentShape(Rectangle()).onTapGesture {
+                                        print("right")
+                                        currentIndex = currentIndex < keys.count - 1 ? currentIndex + 1 : 0
+                                        petType = vm.petTypes[keys[currentIndex]]
+                                        currentKey = petType!.id
+                                    }.frame(width: geo.size.width/2)
                                 }
                             }
-                        }.tabViewStyle(.page)
+                        }
                     }
-                    
-                    HStack {
-                        Color.clear.contentShape(Rectangle()).onTapGesture {
-                                guard let currentIndex = keys.firstIndex(of: currentKey) else {return}
-                                let prevIndex = currentIndex > 0 ? currentIndex - 1 : keys.count - 1
-                                currentKey = keys[prevIndex]
-                            }
-                        }
-                    
-                    
-                    HStack {
-                        Color.clear.contentShape(Rectangle()).onTapGesture {
-                            guard let currentIndex = keys.firstIndex(of: currentKey) else {return}
-                            let nextIndex = currentIndex < keys.count - 1 ? currentIndex + 1 : 0
-                            currentKey = keys[nextIndex]
-                        }
+                } else {
+                    VStack{
+                        Text("Pet Name")
+                        TextField("Enter...", text: $petName)
                     }
                 }
             }
-            else {
-                VStack{
-                    Text("Pet Name")
-                    TextField("Enter...", text: $petName)
-                }
-            }
-            
             Spacer()
 
             HStack{
-                if petType != nil {
+                if selectedType != nil {
                     Button("Back"){
-                        petType = nil
+                        selectedType = nil
                     }
                 }
                 
                 Button("Confirm"){
-                    if petType != nil && petName != "" {
-                        //await vm.newPet(name: petName, typeID: petType!.id)
-                        
-                        self.onPetCreated()
+                    if selectedType != nil && petName != "" {
+                        Task{@MainActor in
+                            await vm.newPet(name: petName, typeID: petType!.id)
+                        }
                     }
                     else{
-                        petType = vm.petTypes[currentKey]
+                        print("TYPE SELECTED")
+                        selectedType = vm.petTypes[currentKey]
                     }
                 }
             }
         }.navigationBarBackButtonHidden(true)
+            .onAppear{
+                print("CREATE PET VIEW")
+                print(ObjectIdentifier(vm.player!))
+
+                
+                if petType == nil {
+                    Task{ @MainActor in
+                        let type = vm.petTypes.first!.value
+                        petType = vm.petTypes[type.id]
+                        currentKey = petType!.id
+                    }
+                }
+            }.onChange(of: vm.player?.pet?.id) {
+                print("PET CREATED ON CHANGE")
+                if vm.player?.pet != nil {
+                    self.onPetCreated(petName, selectedType?.id ?? "")
+                }
+            }
     }
 }

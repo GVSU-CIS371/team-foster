@@ -41,6 +41,7 @@ struct PetStats: Codable{
     }
 }
 
+
 class Pet: Identifiable, Codable{
     var id: String?
     private(set) var name: String
@@ -52,7 +53,7 @@ class Pet: Identifiable, Codable{
     enum CodingKeys: String, CodingKey {
         case id = "user_id"
         case name
-        case typeID
+        case typeID = "type_id"
         case stats
         case equipped
         case lastUpdate = "last_update"

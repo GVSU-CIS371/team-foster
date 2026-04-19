@@ -10,26 +10,88 @@ import Combine
 import FirebaseAuth
 import Security
 
-
+@Observable
 class AuthServiceIOS: ObservableObject, AuthService{
-    var userID: String? = "Default"
     
+    var userID: String? = nil
+    var username: String? = nil
     var loggedIn: Bool
     
     static let shared = AuthServiceIOS()
     
     let auth = Auth.auth()
-    let connMan = ConnectionManager.shared
+    private let cm: ConnectionManager
+    private let cu = ConnectionUtilsIOS()
+
     
-    required internal init() {
+    required internal init(cm: ConnectionManager = .shared) {
         self.userID = auth.currentUser?.uid
+        self.username = auth.currentUser?.displayName ?? "no name"
         self.loggedIn = auth.currentUser != nil
+        self.cm = cm
+
+        
+        cm.registerData(type: LoginData.self) { data, action, reply in
+            print("Login received to phone from watch")
+            print(data)
+            
+            print(self.userID ?? "no user")
+
+            switch action{
+                
+            case .login:
+                print("login received")
+                if(data.password.count > 5){
+                    Task{ @MainActor in
+                        print("registerData login task")
+                        if(!self.loggedIn){
+                            let result = await self.newUser(email: data.email, password: data.password)
+                            
+                            switch result {
+                            case .success:
+                                print("login success")
+                                self.userID = self.auth.currentUser?.uid
+                                self.username = data.username
+                                self.loggedIn = true
+                                reply(LoginData(id: self.userID ?? "", email: self.username! + "@test.com",password: "", username: self.username!, success: true))
+                                
+                            case .failure:
+                                print("login failure")
+                                reply(LoginData(email: "", username: ""))
+                            }
+                        } else {
+                            print("login other")
+                            let email = self.auth.currentUser?.email ?? "no email"
+                            let username = String(email.split(separator: "@").first ?? "")
+                            self.username = username
+                            reply(LoginData(id: self.userID ?? "", email: username + "@test.com",password: "", username: username, success: true))
+                        }
+                    }
+                }
+            case .logout:
+                Task{@MainActor in
+                    print("logout received from watch")
+                    await self.logout()
+                    reply(LoginData())
+                }
+                
+            default:
+                break
+            }
+        }
     }
     
     func logout() async{
         print("logout")
         do{
-            try auth.signOut()
+            print("before auth signout")
+            try self.auth.signOut()
+            
+            print("after auth signout")
+            self.username = nil
+            self.userID = nil
+            self.loggedIn = false
+            
         } catch {
             print("Failed to logout \(error)")
         }
@@ -37,13 +99,6 @@ class AuthServiceIOS: ObservableObject, AuthService{
     
     func login(email e:String, password p:String) async -> Result<String, Error>{
         print("login authservice")
-        
-        /*connMan.send(message: ["event":"login"], replyHandler: { (reply) in
-            if let status = reply["status"] as? String, status == "success"{
-                print("AuthService: Login Sent Phone")
-
-            }
-        })*/
         
         var status = await authenticate(email: e, password: p)
         
@@ -88,6 +143,7 @@ class AuthServiceIOS: ObservableObject, AuthService{
     
     func newUser(email e:String, password p:String) async -> Result<String, Error> {
         print("new user")
+        print(e)
         do{
             _ = try await auth.createUser(withEmail: e, password: p)
             

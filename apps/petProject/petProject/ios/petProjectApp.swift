@@ -29,10 +29,10 @@ struct petProjectApp: App {
     let cm = ConnectionManager.shared
     
 
-    @StateObject var vm = PetViewModel(dbUtil: DBUtilitiesIOS(), authStatus: AuthServiceIOS())
+    @StateObject var vm = PetViewModel(dbUtil: DBUtilitiesIOS(), authStatus: AuthServiceIOS.shared)
     
     init(){
-        cm.register(event:"login") { message in
+        /*cm.register(event:"login") { message in
             print("Login Received Phone @main}")
             
         }
@@ -47,7 +47,7 @@ struct petProjectApp: App {
         
         cm.register(event: "buy") { message in
             print("Play Received Phone @main")
-        }
+        }*/
         
     }
     

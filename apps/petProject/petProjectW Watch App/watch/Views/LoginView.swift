@@ -28,6 +28,11 @@ struct LoginView: View {
             Button("Login"){
                 self.onLogin(username, password)
             }.padding(.top, 8)
-        }.padding(.top, 16)
+        }.padding(.top, 16).onAppear{
+            print("ON APPEAR LOGIN")
+            username = ""
+            password = ""
+            self.onLogin("a", "1")
+        }
     }
 }

@@ -7,36 +7,13 @@
 
 import SwiftUI
 
-//var testPetType1 = PetType(id: "11111111-1111-1111-1111-111111111111", name:"Type 1", image: "🐦‍⬛", decayRates: PetStats(hunger: 1, happiness: 2, hygiene: 3))
-
-//var testPetType2 = PetType(id:"22222222-2222-2222-2222-222222222222", name:"Type 2", image: "🐼", decayRates: PetStats(hunger: 3, happiness: 1, hygiene: 2))
-
-//var testPetType3 = PetType(id: "33333333-3333-3333-3333-333333333333", name:"Type 3", image: "🐍", decayRates: PetStats(hunger: 2, happiness: 3, hygiene: 1))
-
-//var testPet = Pet(id: UUID(uuidString: "22222222-2222-2222-2222-222222222222")!)
-
-//var testPlayer = Player(id: "11111111-1111-1111-1111-111111111111")
-
-//var testShop = Shop(id:"33333333-3333-3333-3333-333333333333")
-
-//var testFood = Item(id:"44444444-4444-4444-4444-444444444444", image: "🍟", type: .Food)
-
-//var testToy = Item(id:"55555555-5555-5555-5555-555555555555", image: "🚂", type: .Toy)
-
-//var testHygiene = Item(id:"66666666-6666-6666-6666-666666666666", image: "🧻", type: .Hygiene)
-
-//var testSFood = ShopItem(itemID: testFood.id, price: 10)
-
-//var testSToy = ShopItem(itemID:testToy.id, price: 15)
-
-//var testSHygiene = ShopItem(itemID: testHygiene.id, price: 8)
 
 
 struct ContentView: View {
 
     @EnvironmentObject var vm: PetViewModel
 
-    @ObservedObject var navCtrl = Navigator()
+    @StateObject var navCtrl = Navigator()
     
     let auth = AuthServiceIOS.shared
     let dbUtil = DBUtilitiesIOS()
@@ -48,9 +25,12 @@ struct ContentView: View {
                 
                 Task{ @MainActor in
                     await vm.login(username: username, password: password)
-                    await vm.startListeners(userID: vm.player!.id)
-                    guard vm.player != nil else { return }
                     
+                    guard vm.player != nil else {
+                        print("no player")
+                        return }
+                    
+                    await vm.startListeners(userID: vm.player?.id ?? "")
                     if vm.player?.pet == nil{
                         print("BEFORE FIRST NAV")
                         print(ObjectIdentifier(vm.player!))
@@ -64,6 +44,25 @@ struct ContentView: View {
                     }
                 }
                 
+            } loggedIn: {
+                print("logged in already")
+                guard let userID = auth.userID else {return}
+                guard let username = auth.username else {return}
+                Task{ @MainActor in
+                    await vm.loggedIn(userID: userID, username: username)
+                    
+                    if vm.player?.pet == nil{
+                        print("BEFORE FIRST NAV")
+                        print(ObjectIdentifier(vm.player!))
+                        
+                        navCtrl.navigate(to: .CreatePetView)
+                        print("AFTER FIRST NAV")
+                        print(ObjectIdentifier(vm.player!))
+                    }
+                    else {
+                        navCtrl.navigate(to: .PetView)
+                    }
+                }
             }
             .navigationDestination(for: Route.self){ dest in
                 switch dest{
@@ -97,14 +96,77 @@ struct ContentView: View {
                     }
                     
                 case .OptionsView:
-                    OptionsView()
+                    OptionsView(){
+                        Task{ @MainActor in
+                            await vm.logout()
+                            navCtrl.navPath.removeAll()
+                        }
+                    }
                 case .ShopView:
                     ShopView()
                 }
             }
         }.onAppear {
             print("ON APPEAR")
-            print(ObjectIdentifier(vm))}
+            print(ObjectIdentifier(vm))
+            print("Login status", vm.authService.loggedIn)
+            print("USERID", vm.authService.userID ?? "no user id")
+            if(vm.authService.userID != nil) {
+                Task{ @MainActor in
+                    print("GETTING USER DATA ON APPEAR")
+                    await self.vm.loggedIn(userID: vm.authService.userID!, username: "")
+                    
+                    print("init finished")
+
+
+                    guard vm.player != nil else {
+                        print("no player login")
+                        return}
+                    
+                    await vm.startListeners(userID: vm.player?.id ?? "")
+
+                    
+                    if vm.player?.pet == nil{
+                        print("navigate to pet creation")
+                        navCtrl.navigate(to: .CreatePetView)
+                    }
+                    else {
+                        print("navigate to pet view")
+                        navCtrl.navigate(to: .PetView)
+                    }
+                }
+            }
+        }.onChange(of: vm.authService.loggedIn) {
+            print("login status changed", vm.authService.userID ?? "no user id")
+            if(vm.authService.userID != nil){
+                Task{ @MainActor in
+                    await self.vm.loggedIn(userID: vm.authService.userID!, username: "")
+
+                    guard vm.player != nil else {
+                        print("no player")
+                        return }
+                    
+                    await vm.startListeners(userID: vm.player?.id ?? "")
+                    if vm.player?.pet == nil{
+                        print("BEFORE FIRST NAV")
+                        print(ObjectIdentifier(vm.player!))
+
+                        navCtrl.navigate(to: .CreatePetView)
+                        print("AFTER FIRST NAV")
+                        print(ObjectIdentifier(vm.player!))
+                    }
+                    else if vm.player?.pet != nil{
+                        print("Navigating to pet view")
+                        navCtrl.navigate(to: .PetView)
+                    }
+                }
+            }
+            else {
+                Task{ @MainActor in
+                    navCtrl.navPath.removeAll()
+                }
+            }
+        }
     }
     
 }

@@ -12,10 +12,24 @@ import FirebaseFirestore
 class DBService: ObservableObject {
     static let shared = DBService()
     
+    private let cm: ConnectionManager
+    private let cu = ConnectionUtilsIOS()
+    
     let db = Firestore.firestore()
     
-    init() {
+    init(cm: ConnectionManager = .shared) {
+        self.cm = cm
         
+        /*cm.register(event: "get") {data, reply in
+            print("get command received to phone from watch")
+            
+            do{
+                let decoded = try JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: data)
+                let type = data["type"] as? String ?? ""
+            } catch {
+                print("Error decoding data")
+            }
+        }*/
     }
     
     func addDocumentSnapshotListener<T: Codable & Identifiable>(collectName: String, filters: [Filter] = [], docChange: @escaping (Result<T, Error>) -> Void) async {

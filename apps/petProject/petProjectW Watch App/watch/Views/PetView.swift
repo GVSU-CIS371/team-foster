@@ -1,37 +1,49 @@
 //
 //  PetView.swift
 //  petProject
-//
+//  Watch
 //  Created by Aaron Foster on 3/1/26.
 //
 
 import SwiftUI
 
 struct PetView: View{
-    @ObservedObject var vm: PetViewModel
+    @EnvironmentObject var vm: PetViewModel
     @State private var missingItem = false
     @State private var alertMessage = ""
+    var userID: String {
+        vm.player?.id ?? ""
+    }
+    var happiness: String {
+        String(vm.player?.pet?.stats.happiness ?? -1)
+    }
+    
+    var hunger: String {
+        String(vm.player?.pet?.stats.hunger ?? -1)
+    }
+    
+    var hygiene: String {
+        String(vm.player?.pet?.stats.hygiene ?? -1)
+    }
+    
+    var typeID: String {
+        vm.player?.pet?.typeID ?? ""
+    }
+    
+    var petImage: String {
+        vm.petTypes[typeID]?.image ?? "⁉️"
+    }
+    
     private var onInventory: () -> Void
     private var onOptions: () -> Void
     private let buttonSize: CGFloat = 32
     private let fontColor: Color = .red
-    private let pet: Pet?
-    private let petType: PetType
-    private let inventory: Inventory?
-    private let items: [String: Item]
-    private let userID: String
+
     
-    init(vm: PetViewModel, onInventory: @escaping () -> Void, onOptions: @escaping () -> Void) {
-        self.vm = vm
+    init(onInventory: @escaping () -> Void, onOptions: @escaping () -> Void) {
         self.onInventory = onInventory
         self.onOptions = onOptions
-        
-        self.userID = vm.player?.id ?? ""
-        self.pet = vm.player?.pet
-        self.inventory = vm.player?.inventory
-        self.petType = vm.petTypes[pet!.typeID]!
-        self.items = vm.items
-        
+    
     }
     
     var body: some View {
@@ -39,15 +51,15 @@ struct PetView: View{
             HStack(spacing:30){
                 VStack{
                     Text("🙂")
-                    Text("\(pet?.stats.happiness ?? 0)")
+                    Text("\(happiness)")
                 }
                 VStack{
                     Text("🍽️")
-                    Text("\(pet?.stats.hunger ?? 0)")
+                    Text("\(hunger)")
                 }
                 VStack{
                     Text("🫧")
-                    Text("\(pet?.stats.hygiene ?? 0)")
+                    Text("\(hygiene)")
                 }
             }.frame(maxWidth: .infinity).background(Color.blue).padding(.top, 32).ignoresSafeArea(edges: .top)
 
@@ -58,7 +70,7 @@ struct PetView: View{
                     self.onInventory()
                 }
                 VStack{
-                    Text(petType.image).font(Font.largeTitle.bold())
+                    Text(petImage).font(Font.largeTitle.bold())
                 }.frame(width: 100, height: 100)
                 Button("⚙️"){
                     self.onOptions()

@@ -41,7 +41,7 @@ class Shop: Identifiable, Codable {
         case lastUpdate = "last_update"
     }
     
-    init(id: String = "test id", name: String = "Test Shop", inventory: [String: ShopItem] = [:], lastUpdate: Date = Date()){
+    init(id: String = "test_id", name: String = "Test Shop", inventory: [String: ShopItem] = [:], lastUpdate: Date = Date()){
         self.id = id
         self.name = name
         self.items = inventory

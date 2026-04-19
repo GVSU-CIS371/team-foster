@@ -8,59 +8,91 @@
 import SwiftUI
 
 struct ShopView: View {
-    @ObservedObject var vm: PetViewModel
+    @EnvironmentObject var vm: PetViewModel
     @State private var currentIndex: Int = 0
     @State private var currentKey: String = ""
+    @State private var item: ShopItem? = nil
+    var userID: String {
+        vm.player?.id ?? ""
+    }
+    var currency: String {
+        String(vm.player?.currency ?? 0)
+    }
     
-    private let shop: Shop
+    var keys: [String] {
+        Array(vm.shop!.items.keys)
+    }
     
-    init(vm: PetViewModel){
-        self._vm = ObservedObject(wrappedValue: vm)
-        self.shop = vm.shop!
+    
+    init(){
+
     }
     
     var body: some View{
         
         VStack{
-            Text("$\(String(describing: vm.player?.currency))")
+            Text("$\(currency)")
             Spacer()
             ZStack{
-                let keys = Array(shop.items.keys)
-                TabView(selection: $currentKey){
-                    ForEach(keys, id: \.self){ key in
-                        if let item = vm.items[key] {
-                            VStack{
-                                Text(item.name)
-                                Text(item.image)
-                                Spacer()
-                                HStack{
-                                    Text(item.type.rawValue)
-                                    Spacer()
-                                    Text("$\(shop.items[key]!.price)")
-                                }.padding(16)
-                            }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .background(Color.blue).cornerRadius(10).tag(key)
+                VStack{
+                    TabView(selection: $currentKey){
+                        ForEach(keys, id: \.self){ key in
+                            if let shopItem = vm.shop?.items[key] {
+                                if let sItem = vm.items[shopItem.id]{
+                                    var quantity: String {
+                                        if shopItem.quantity != nil {
+                                            String(shopItem.quantity!)
+                                        }
+                                        else {
+                                            "∞"
+                                        }
+                                    }
+                                    
+                                    VStack{
+                                        Text(sItem.name)
+                                        Spacer()
+                                        Text(sItem.image).font(.system(size: 30))
+                                        Spacer()
+                                        HStack{
+                                            Text("Price: \(shopItem.price)")
+                                            Spacer()
+                                            Text("Quantity: \(quantity)")
+                                        }
+                                            
+                                    }.padding(.bottom, 16).padding(.horizontal, 16).frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .background(Color.blue).cornerRadius(10).tag(key)
+                                }
+                            }
                         }
                     }.tabViewStyle(.page)
-                    
+                }
+                
+                GeometryReader{geo in
                     HStack {
                         Color.clear.contentShape(Rectangle()).onTapGesture {
-                            guard let currentIndex = keys.firstIndex(of: currentKey) else {return}
-                            let prevIndex = currentIndex > 0 ? currentIndex - 1 : keys.count - 1
-                            currentKey = keys[prevIndex]
-                        }
-                    }
-                    
-                    HStack {
-                        Color.clear.contentShape(Rectangle()).onTapGesture {
-                            guard let currentIndex = keys.firstIndex(of: currentKey) else {return}
-                            let prevIndex = currentIndex < keys.count - 1 ? currentIndex + 1 : 0
-                            currentKey = keys[prevIndex]
-                        }
+                            print("left")
+                            currentIndex = currentIndex > 0 ? currentIndex - 1 : keys.count - 1
+                            item = vm.shop!.items[keys[currentIndex]]
+                            currentKey = item!.id
+                        }.frame(width: geo.size.width/2)
+                        Spacer()
                     }
                 }
                 
-                Spacer()
+                GeometryReader{geo in
+                    HStack {
+                        Spacer()
+                        Color.clear.contentShape(Rectangle()).onTapGesture {
+                            print("right")
+                            currentIndex = currentIndex < keys.count - 1 ? currentIndex + 1 : 0
+                            item = vm.shop!.items[keys[currentIndex]]
+                            currentKey = item!.id
+                        }.frame(width: geo.size.width/2)
+                    }
+                }
+            }
+                
+                //Spacer()
                 Button("Buy"){
                     let currentItem = vm.shop?.allShopItems()[currentIndex]
                     vm.buyItem(currentItem!)
@@ -68,5 +100,5 @@ struct ShopView: View {
                 
             }.ignoresSafeArea(edges: .bottom)
         }
-    }
+    
 }

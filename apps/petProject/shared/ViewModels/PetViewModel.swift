@@ -17,20 +17,168 @@ class PetViewModel: ObservableObject {
     var items: [String: Item] = [:]
     private var timer:Timer = Timer()
     private let dbUtil: DBUtilities
-    private let authService: AuthService
-    
+    let authService: AuthService
+    private let connMan: ConnectionManager
     private var timeUnit = 1.0 // 60 = to Minutes, 1 = to Seconds
     private var decayInterval = 10 // timeUnits
+    var logged: Bool = false
+    var playerInit: Bool = false
+    var petInit: Bool = false
+    var itemInit: Bool = false
+    var shopInit: Bool = false
+    var inventoryInit: Bool = false
+    var shopItemInit: Bool = false
+    var invItemInit: Bool = false
+    var ready: Bool = false
+    var prevLogin: Bool = false
     
     private var userID: String {
         self.player?.id ?? ""
     }
     
-    init(dbUtil: DBUtilities, authStatus: AuthService){
+    init(dbUtil: DBUtilities, authStatus: AuthService, cm: ConnectionManager = .shared){
         self.dbUtil = dbUtil
         self.authService = authStatus
+        self.connMan = cm
+        
+        cm.onPlayerUpdate = { [weak self] player in
+            Task{@MainActor in
+                print("watch vm player update ", player)
+                if player.pet == nil {
+                    player.pet = self?.player?.pet
+                }
+                
+                if player.inventory == nil {
+                    player.inventory = self?.player?.inventory
+                }
+                
+                self?.player = player as Player
+                
+                print(self?.player ?? "no player", self?.player?.pet ?? "no pet", self?.player?.inventory ?? "no inventory")
+                self?.logged = true
+                self?.playerInit = true
+                self?.CheckReady()
+                print("player updated watch ", self?.player ?? "nil")
+                print("updated from ", player)
+            }
+        }
+        cm.onPetUpdate = { [weak self] pet in
+            Task{@MainActor in
+                
+                print("watch vm pet update ", pet)
+                /*if self?.player?.pet != nil && pet.lastUpdate > (self?.player?.pet?.lastUpdate)!{
+                 self?.player?.pet = pet
+                 self?.petInit = true
+                 } else if self?.player?.pet == nil {
+                 self?.player?.pet = pet
+                 self?.petInit = true
+                 } else {
+                 print("pet not set")
+                 }*/
+                
+                let player = self?.player
+                
+                player?.pet = pet as Pet?
+                
+                self?.player = player
+                self?.petInit = true
+                
+                self?.CheckReady()
+            }
+        }
+        cm.onInventoryUpdate = { [weak self] inv in
+            Task{@MainActor in
+                
+                print("watch vm inventory update ", inv)
+                /*if self?.player?.inventory != nil && inv.lastUpdate > (self?.player?.inventory?.lastUpdate)!{
+                 self?.player?.inventory = inv
+                 self?.inventoryInit = true
+                 } else if self?.player?.inventory == nil {
+                 self?.player?.inventory = inv
+                 self?.inventoryInit = true
+                 } else {
+                 print("inventory not set")
+                 }*/
+                print("RECEIVED INVENTORY")
+                if self?.player?.inventory != nil && inv.items.isEmpty {
+                    inv.items = self?.player?.inventory?.items ?? ["error":InventoryItem(id: "error", quantity: -1, userID: "error")]
+                }
+                self?.player?.inventory = inv as Inventory
+                self?.inventoryInit = true
+                
+                Task{ @MainActor in
+                    try await dbUtil.getInventoryItems(userID: self!.userID)
+                }
+                
+                self?.CheckReady()
+            }
+        }
+        cm.onInvItemUpdate = { [weak self] invItem in
+            Task{@MainActor in
+                
+                print("watch vm inventory item update ", invItem)
+                /*if self?.player?.inventory != nil {
+                 self?.player?.inventory?.items[invItem.id] = invItem
+                 self?.invItemInit = true
+                 } else {
+                 print ("inventory item not set")
+                 }*/
+
+                if(invItem.id != "empty"){
+                    self?.player?.inventory?.items[invItem.id] = invItem as InventoryItem
+                }
+                self?.invItemInit = true
+
+                self?.CheckReady()
+            }
+        }
+        cm.onShopUpdate = { [weak self] shop in
+            Task{@MainActor in
+                
+                print("watch vm shop update ", shop)
+                /*if self?.shop != nil && shop.lastUpdate > (self?.shop?.lastUpdate)!{
+                 self?.shop = shop
+                 self?.shopInit = true
+                 } else if self?.shop == nil {
+                 self?.shop = shop
+                 self?.shopInit = true
+                 } else {
+                 print("shop not set")
+                 }*/
+                if shop.items.isEmpty {
+                    shop.items = self?.shop?.items ?? [:]
+                }
+                self?.shop = shop as Shop
+                self?.shopInit = true
+                
+                Task{@MainActor in
+                    try await dbUtil.getShopItems(name: self!.shop!.id)
+                }
+                
+                self?.CheckReady()
+            }
+        }
+        cm.onShopItemUpdate = { [weak self] shopItem in
+            Task{@MainActor in
+                
+                print("watch vm shop item update ", shopItem)
+                /*if self?.shop != nil {
+                 self?.shop?.items[shopItem.id] = shopItem
+                 self?.shopItemInit = true
+                 } else {
+                 print ("shop item not set")
+                 }*/
+                
+                self?.shop?.items[shopItem.id] = shopItem as ShopItem
+                self?.shopItemInit = true
+                
+                
+                self?.CheckReady()
+            }
+        }
         
         print("PVM INIT ", ObjectIdentifier(self))
+        print(authService.userID ?? "no user")
     }
     
     func petTimer() {
@@ -43,8 +191,13 @@ class PetViewModel: ObservableObject {
     }
     
     func updatePetDecay() async {
-        guard self.player != nil else { return }
-        guard self.player?.pet != nil else { return }
+        guard self.player != nil else {
+            print("MISSING PLAYER UPDATE PET DECAY")
+            return }
+        guard self.player?.pet != nil else {
+            print("MISSING PET UPDATE PET DECAY")
+            return }
+        print("PLAYER AND PET OK UPDATE PET DECAY")
         let lastPetUpdated = self.player?.pet?.lastUpdate ?? nil
         let timeSincePetUpdate = Date().timeIntervalSince(lastPetUpdated!) / timeUnit
         let intervalsSincePetUpdate = Int(floor(timeSincePetUpdate / Double(self.decayInterval)))
@@ -54,10 +207,24 @@ class PetViewModel: ObservableObject {
         self.player?.pet?.decayPetStats(type: self.petTypes[typeID]!, intervals: intervalsSincePetUpdate)
 
         do{
+            print("BEFORE UPDATE PLAYER")
             try await self.dbUtil.updatePlayer(userID: self.player!.id, player: self.player!)
+            print("AFTER UPDATE PLAYER BEFORE UPDATE PET")
             try await self.dbUtil.updatePet(userID: self.player!.id, pet: self.player!.pet!)
+            print("UPDATE PET")
         } catch {
             print("Error updating pet decay")
+        }
+    }
+    
+    func CheckReady(){
+        print("CHECK READY", playerInit, petInit, shopInit, inventoryInit, invItemInit, shopItemInit)
+        
+        if(playerInit && petInit && shopInit && inventoryInit && shopItemInit) {
+            Task{@MainActor in
+                self.ready = true
+            }
+            
         }
     }
     
@@ -70,9 +237,6 @@ class PetViewModel: ObservableObject {
     }
     
     func buyItem(_ shopItem: ShopItem) {
-        ConnectionManager.shared.sendData(object: shopItem) { _ in
-            print("Buy Item Error")
-        }
         
         if self.player?.currency ?? 0 >= shopItem.price, shopItem.quantity == nil || shopItem.quantity! > 0{
             Task{ @MainActor in
@@ -109,12 +273,16 @@ class PetViewModel: ObservableObject {
     
     
     func useFirstItemOfType(typeID: String) async {
+        print("FIRST TYPE", typeID)
         let userID = self.player!.id
         let item: String? = (self.player?.inventory?.items.first(where: { (key, value) in
             self.items[key]!.type.rawValue == typeID})?.value.id) ?? nil
         
+        print("FIRST ITEM", item ?? "no item")
+        
         if item != nil{
             do {
+                print("USE ITEM", item ?? "no item", userID)
                 try await useItem(item!, userID: userID)
             } catch { print("Error using first item of type: \(error)") }
         }
@@ -122,9 +290,6 @@ class PetViewModel: ObservableObject {
     
     
     func useItem(_ item: String, userID: String) async throws {
-        ConnectionManager.shared.sendData(object: item) { _ in
-            print("Use Item Error")
-        }
         
         var invItem = self.player!.inventory!.getItem(item)
         let effectVal = self.items[item]!.effectValue ?? 0
@@ -154,8 +319,12 @@ class PetViewModel: ObservableObject {
         do{
             invItem.quantity -= 1
             
+            print("USE ITEM UPDATERS")
+            print("++++++++++++++++++++++++ UPDATE INVENTORY ITEM")
             try await self.dbUtil.updateInventoryItem(invItem: invItem)
+            print("++++++++++++++++++++++++ UPDATE INVENTORY")
             try await self.dbUtil.updateInventory(userID: userID, inventory: self.player!.inventory!)
+            print("++++++++++++++++++++++++ UPDATE PET")
             try await self.dbUtil.updatePet(userID: userID, pet: self.player!.pet!)
         } catch {
             print("Error using item: \(error)")
@@ -163,11 +332,22 @@ class PetViewModel: ObservableObject {
     }
     
     func login(username: String, password: String) async {
-        let response = await authService.newUser(email: username, password: password)
-        if case .success(let success) = response {
-            guard let userID = authService.userID else { return }
+        guard !username.isEmpty, !password.isEmpty else {
+            print("empty username or password")
+            return }
+        let response = await authService.newUser(email: username + "@test.com", password: password)
+        print(response)
+        switch response {
+            
+        case .success(let success):
+            print("user logged in ", success)
+            guard let userID = authService.userID else {
+                print("no auth service user id")
+                return }
             print("login success petviewmodel \(success)")
             await loggedIn(userID: userID, username: username)
+        case.failure(let error):
+            print("login error:", error.localizedDescription)
         }
     }
         
@@ -175,30 +355,53 @@ class PetViewModel: ObservableObject {
     func loggedIn(userID: String, username: String) async {
         
         do{
-            await initPlayer(userID: userID, username: username)
-            print("Player initialized")
-            
+            print("LOGGED IN START player:", self.player?.id ?? "nil")
+            if username != ""{
+                await initPlayer(userID: userID, username: username)
+                print("Player initialized")
+            } else if userID != "" {
+                self.player = try await dbUtil.getPlayer(userID: userID)
+            }
             self.petTypes = try await dbUtil.getPetTypes()
             guard self.petTypes.count > 0 else { return }
             print("Pet Types initialized")
-            
+            print(self.petTypes)
             await initPet(userID: userID)
             print("Pet initialized")
-            
             self.items = try await dbUtil.getItems()
             guard self.items.count > 0 else { return }
             print("Items initalized")
-            
+            print(self.items)
             await initInventory(userID: userID)
             guard self.player!.inventory != nil else { return }
             print("Inventory initialized")
-
             await initShop()
             print("Shop initialized")
             
             
         } catch {
             print("error after login \(error)")
+        }
+    }
+    
+    func logout() async{
+        Task{@MainActor in
+            print("VM LOGOUT TASK")
+            
+            self.player = nil
+            self.ready = false
+            self.playerInit = false
+            self.petInit = false
+            self.shopInit = false
+            self.inventoryInit = false
+            self.invItemInit = false
+            self.shopItemInit = false
+            self.logged = false
+            self.prevLogin = true
+            await self.authService.logout()
+            
+            print(self.player ?? "no player")
+            print(self.authService.userID ?? "no userID")
         }
     }
     
@@ -242,16 +445,20 @@ class PetViewModel: ObservableObject {
         
         do{
             play = try await dbUtil.getPlayer(userID: userID)
+            print("initPlayer play ", play ?? "no player")
         } catch DBError.notFound {
             await dbUtil.addPlayer(userID: userID, username: username)
             do{
                 play = try await dbUtil.getPlayer(userID: userID)
+                print("initPlayer play retry ", play ?? "no player")
+
             } catch { print("Error getting player: \(error)")}
         } catch { play = nil; print("Error getting player: \(error)")}
         
         guard play != nil else {return}
         if self.player == nil{
             self.player = play!
+            print("initial player")
         }
         
     }
@@ -260,26 +467,36 @@ class PetViewModel: ObservableObject {
     func initPet(userID: String) async {
         do{
             let pet = try await dbUtil.getPet(userID: userID)
+            dump(pet)
+            print("RECEIVED PET")
+            dump(self.player?.pet)
+            print("PLAYER PET")
             
-            if self.player?.pet == nil{
-                self.player!.pet = pet
+            self.player?.pet = pet
+            
+            if self.player?.pet!.id == "error"{
+                print("ERROR PET")
+                self.player?.pet = nil
             }
             
+            print("PLAYER PET STATUS", self.player?.pet ?? "no pet")
             guard self.player?.pet != nil else { print("Error initializing pet");  return }
             await self.updatePetDecay()
         } catch {
-            print(error)
+            print("INIT PET ERROR", error)
         }
         
     }
     
     func startListeners(userID: String) async {
-        await startPlayerListener(userID: userID)
-        await startPetListener(userID: userID)
-        await startInventoryListener(userID: userID)
-        await startInventoryItemListener(userID: userID)
-        await startShopListener()
-        await startShopItemListener(id: self.shop!.id)
+        if(userID != ""){
+            await startPlayerListener(userID: userID)
+            await startPetListener(userID: userID)
+            await startInventoryListener(userID: userID)
+            await startInventoryItemListener(userID: userID)
+            await startShopListener()
+            await startShopItemListener(id: self.shop!.id)
+        }
     }
     
     func startPlayerListener(userID: String) async{
@@ -297,7 +514,6 @@ class PetViewModel: ObservableObject {
                     }
                     
                     self.player = player
-                    print("PLAYER LISTENER FIRED")
                 }
                 
             case .failure(let error):
@@ -318,7 +534,6 @@ class PetViewModel: ObservableObject {
                     self.player = updatedPlayer
                 }
                 
-                print("PET LISTENER FIRED")
             case .failure(let error):
                 print("Pet Listener PetViewModel: \(error)")                
             }
@@ -336,7 +551,7 @@ class PetViewModel: ObservableObject {
                     
                     self.player?.inventory = inventoryData
                 }
-                print("INVENTORY LISTENER FIRED")
+                
             case .failure(let error):
                 print("Inventory Listener PetViewModel: \(error)")
 
@@ -354,7 +569,6 @@ class PetViewModel: ObservableObject {
                     updatedPlayer.inventory!.items[inventoryItemData.id] = inventoryItemData
                     self.player! = updatedPlayer
                 }
-                print("INVENTORY ITEM LISTENER FIRED \(String(describing: inventoryItemData))")
                 
             case .failure(let error):
                 print("Inventory Items Listener PetViewModel: \(error)")
@@ -374,7 +588,6 @@ class PetViewModel: ObservableObject {
                     self.shop! = shopData
                 }
                 
-                print("SHOP LISTENER FIRED")
             case .failure(let error):
                 print("Shop Listener PetViewModel: \(error)")
                 
@@ -390,7 +603,6 @@ class PetViewModel: ObservableObject {
                     self.shop!.items[shopItemData.id] = shopItemData
                 }
                 
-                print("SHOP ITEM LISTENER FIRED")
             case .failure(let error):
                 print("Shop Items Listener PetViewModel: \(error)")
                 
