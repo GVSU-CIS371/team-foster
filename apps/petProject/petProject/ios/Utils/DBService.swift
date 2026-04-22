@@ -32,15 +32,16 @@ class DBService: ObservableObject {
         }*/
     }
     
-    func addDocumentSnapshotListener<T: Codable & Identifiable>(collectName: String, filters: [Filter] = [], docChange: @escaping (Result<T, Error>) -> Void) async {
+    func addDocumentSnapshotListener<T: Codable & Identifiable>(collectName: String, filters: [Filter] = [], docChange: @escaping (Result<T, Error>) -> Void) async -> ListenerRegistration? {
+    
         do{
             let collect: Query = queryCollection(collectName: collectName, filters: filters)
             let doc = try await collect.getDocuments().documents.first ?? nil
             guard doc != nil else {
-                return
+                return nil
             }
             let docRef = doc!.reference
-            docRef.addSnapshotListener { snapshot, error in
+            let listener = docRef.addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else{
                     print ("Error fetching collections")
                     return
@@ -62,14 +63,17 @@ class DBService: ObservableObject {
                     docChange(.failure(error))
                 }
             }
+            
+            return listener
         }catch {print("Error getting document: \(error.localizedDescription)")}
 
+        return nil
     }
     
-    func addNamedDocumentSnapshotListener<T: Codable & Identifiable>(collectName: String, docName: String, filters: [Filter] = [], docChange: @escaping (Result<T, Error>) -> Void) async {
+    func addNamedDocumentSnapshotListener<T: Codable & Identifiable>(collectName: String, docName: String, filters: [Filter] = [], docChange: @escaping (Result<T, Error>) -> Void) -> ListenerRegistration {
             let docRef = db.collection(collectName).document(docName)
 
-            docRef.addSnapshotListener { snapshot, error in
+            let listener = docRef.addSnapshotListener { snapshot, error in
                 guard let snapshot = snapshot else{
                     print ("Error fetching collections")
                     return
@@ -92,13 +96,14 @@ class DBService: ObservableObject {
                 }
             }
 
+            return listener
     }
     
     
-    func addCollectionSnapshotListener<T: Codable & Identifiable>(collectName: String, filters: [Filter] = [], collectChange: @escaping (Result<T, Error>) -> Void) async {
+    func addCollectionSnapshotListener<T: Codable & Identifiable>(collectName: String, filters: [Filter] = [], collectChange: @escaping (Result<T, Error>) -> Void) -> ListenerRegistration {
             let collect: Query = queryCollection(collectName: collectName, filters: filters)
             
-            collect.addSnapshotListener { (snapshot, error) in
+        let listener = collect.addSnapshotListener { (snapshot, error) in
                 guard let snapshot = snapshot else{
                     print ("Error fetching collections \(error!)")
                     return
@@ -120,6 +125,8 @@ class DBService: ObservableObject {
                     collectChange(.failure(error))
                 }
             }
+        
+        return listener
     }
     
     func createDoc<T: Codable>(collectName: String, data: T) async{

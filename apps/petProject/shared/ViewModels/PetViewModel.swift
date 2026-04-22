@@ -398,7 +398,9 @@ class PetViewModel: ObservableObject {
             self.shopItemInit = false
             self.logged = false
             self.prevLogin = true
+            self.dbUtil.stopListening()
             await self.authService.logout()
+            
             
             print(self.player ?? "no player")
             print(self.authService.userID ?? "no userID")

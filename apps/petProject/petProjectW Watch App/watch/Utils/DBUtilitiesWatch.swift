@@ -15,6 +15,10 @@
 import SwiftUI
 
 class DBUtilitiesWatch: DBUtilities {
+    func stopListening() {
+        print("STOP LISTENING")
+    }
+    
     
     private let cm: ConnectionManager
     

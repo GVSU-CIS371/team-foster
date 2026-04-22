@@ -58,6 +58,7 @@ protocol DBUtilities {
     func listenToInventoryItems(userID: String, listened: @escaping (Result<InventoryItem, Error>) -> Void) async
     func listenToShop(listened: @escaping (Result<Shop, Error>) -> Void) async
     func listenToShopItems(shopID: String, listened: @escaping (Result<ShopItem, Error>) -> Void) async
+    func stopListening()
 
     func addPlayer(userID: String, username: String) async
     func addPet(userID: String, name: String, typeID: String) async

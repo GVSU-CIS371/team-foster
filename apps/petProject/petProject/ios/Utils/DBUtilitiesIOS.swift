@@ -22,6 +22,8 @@ extension DBError {
 class DBUtilitiesIOS: DBUtilities {
     
     private var cm: ConnectionManager
+    private var listeners: [ListenerRegistration] = []
+
     
     init(cm: ConnectionManager = .shared){
         self.cm = cm
@@ -659,7 +661,7 @@ class DBUtilitiesIOS: DBUtilities {
         let collectName = CollectionNames.users.rawValue
         let filters = Filter(from: "user_id", to: userID, op: FilterOperation.EqualTo)
         
-        await DBService.shared.addDocumentSnapshotListener(collectName: collectName, filters: [filters]) { (result: Result<Player, Error>) in
+        let playerListener = await DBService.shared.addDocumentSnapshotListener(collectName: collectName, filters: [filters]) { (result: Result<Player, Error>) in
             switch result{
             case .success(let playerData):
                 //playerData.id = userID
@@ -669,11 +671,18 @@ class DBUtilitiesIOS: DBUtilities {
                 listened(.failure(error))
             }
         }
+        
+        if playerListener != nil{
+            self.listeners.append(playerListener!)
+        }
+        
+        
     }
     
     func listenToPet(userID: String, listened: @escaping (Result <Pet, Error>) -> Void)  async  {
         let collectName = CollectionNames.pets.rawValue
-        await DBService.shared.addNamedDocumentSnapshotListener(collectName: collectName, docName: userID) { (result: Result<Pet, Error>) in
+         
+        let petListener = DBService.shared.addNamedDocumentSnapshotListener(collectName: collectName, docName: userID) { (result: Result<Pet, Error>) in
             switch result{
             case .success(let petData):
                 listened(.success(petData))
@@ -682,11 +691,13 @@ class DBUtilitiesIOS: DBUtilities {
                 listened(.failure(error))
             }
         }
+        
+            self.listeners.append(petListener)
     }
     
     func listenToInventory(userID: String, listened: @escaping (Result<Inventory, Error>) -> Void) async {
         let collectName = CollectionNames.inventories.rawValue
-        await DBService.shared.addNamedDocumentSnapshotListener(collectName: collectName, docName: userID) { (result: Result<Inventory, Error>) in
+        let inventoryListener = DBService.shared.addNamedDocumentSnapshotListener(collectName: collectName, docName: userID) { (result: Result<Inventory, Error>) in
             switch result{
             case .success(let inventoryData):
                 listened(.success(inventoryData))
@@ -695,12 +706,14 @@ class DBUtilitiesIOS: DBUtilities {
                 listened(.failure(error))
             }
         }
+        
+            self.listeners.append(inventoryListener)
     }
     
     func listenToInventoryItems(userID: String, listened: @escaping (Result<InventoryItem, Error>) -> Void)  async {
         let collectName = CollectionNames.inventory_items.rawValue
         let invFilters = Filter(from: "user_id", to: userID, op: FilterOperation.EqualTo)
-        await DBService.shared.addCollectionSnapshotListener(collectName: collectName, filters: [invFilters]) { (result: Result<InventoryItem, Error>) in
+        let invItemsListener =  DBService.shared.addCollectionSnapshotListener(collectName: collectName, filters: [invFilters]) { (result: Result<InventoryItem, Error>) in
             switch result{
             case .success(let inventoryData):
                 listened(.success(inventoryData))
@@ -709,11 +722,13 @@ class DBUtilitiesIOS: DBUtilities {
                 listened(.failure(error))
             }
         }
+        
+            self.listeners.append(invItemsListener)
     }
     
     func listenToShop(listened: @escaping (Result<Shop, Error>) -> Void) async {
         let collectName = CollectionNames.shops.rawValue
-        await DBService.shared.addCollectionSnapshotListener(collectName: collectName) { (result: Result<Shop, Error>) in
+        let shopListener =  DBService.shared.addCollectionSnapshotListener(collectName: collectName) { (result: Result<Shop, Error>) in
             switch result{
             case .success(let shopData):
                 listened(.success(shopData))
@@ -722,12 +737,14 @@ class DBUtilitiesIOS: DBUtilities {
                 listened(.failure(error))
             }
         }
+        
+        self.listeners.append(shopListener)
     }
     
     func listenToShopItems(shopID: String, listened: @escaping (Result<ShopItem, Error>) -> Void) async {
         let collectName = CollectionNames.shop_items.rawValue
         let shopFilters = Filter(from: "shop_id", to: shopID, op: FilterOperation.EqualTo)
-        await DBService.shared.addCollectionSnapshotListener(collectName: collectName, filters: [shopFilters]) { (result: Result<ShopItem, Error>) in
+        let shopItemsListener =  DBService.shared.addCollectionSnapshotListener(collectName: collectName, filters: [shopFilters]) { (result: Result<ShopItem, Error>) in
             switch result{
             case .success(let shopItemData):
                 listened(.success(shopItemData))
@@ -736,6 +753,17 @@ class DBUtilitiesIOS: DBUtilities {
                 listened(.failure(error))
             }
         }
+        
+        self.listeners.append(shopItemsListener)
+        
+    }
+    
+    func stopListening(){
+        for listener in listeners{
+            listener.remove()
+        }
+        
+        listeners.removeAll()
     }
     
     func addPlayer(userID: String, username: String) async {
