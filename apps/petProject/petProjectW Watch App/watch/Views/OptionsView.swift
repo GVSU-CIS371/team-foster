@@ -19,6 +19,6 @@ struct OptionsView: View {
         
         Button("Logout"){
             self.onLogout()
-        }.padding().clipShape(Capsule()).border(Color.white)
+        }
     }
 }

@@ -659,6 +659,17 @@ class DBUtilitiesWatch: DBUtilities {
     
     func addPlayer(userID: String, username: String) async {
         print("ADD PLAYER WATCH")
+        let player = Player(id: userID, username: username)
+        
+        self.cm.sendData(data: player, action:ConnectionManager.ActionType.add) { reply in
+            guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply) else {return}
+            guard let playerData = try? JSONDecoder().decode(Player.self, from: response.payload) else {return}
+            print("returned player data ", playerData.id)
+            if(playerData.id != player.id){
+                print("ERROR ADDING PLAYER")
+            }
+        }
+        
     }
     
     func listenToPet(userID: String, listened: @escaping (Result<Pet, any Error>) -> Void){

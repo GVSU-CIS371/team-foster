@@ -39,7 +39,9 @@ class AuthServiceWatch: ObservableObject, AuthService{
         
         return await withCheckedContinuation{ continuation in
  
+            print(email)
             let username = String(email.split(separator: "@").first ?? "")
+            print(username)
             let loginData = LoginData(id: "testID", email: email, password: password, username: username)
             
             self.cm.sendData(data: loginData, action: ConnectionManager.ActionType.login) { reply in
@@ -54,6 +56,8 @@ class AuthServiceWatch: ObservableObject, AuthService{
                     continuation.resume(returning: .failure(AuthStatus.failure))
                     return
                 }
+                print("decoded: \(decoded.username)")
+                
                 self.userID = decoded.id
                 self.username = decoded.username
                 self.loggedIn = true

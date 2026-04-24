@@ -51,12 +51,15 @@ struct ShopView: View {
                                     VStack{
                                         Text(sItem.name)
                                         Spacer()
-                                        Text(sItem.image).font(.system(size: 300))
+                                        Text(sItem.image).font(.system(size: 200))
                                         Spacer()
                                         HStack{
-                                            Text("Price: \(shopItem.price)")
+                                            Text(sItem.type.rawValue)
                                             Spacer()
-                                            Text("Quantity: \(quantity)")
+                                            VStack{
+                                                Text("Price: \(shopItem.price)")
+                                                Text("Quantity: \(quantity)")
+                                            }
                                         }
                                             
                                     }.padding(.bottom, 16).padding(.horizontal, 16).frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -94,11 +97,12 @@ struct ShopView: View {
             
  
                 //Spacer()
-                Button("Buy"){
+                Button("Buy 💵"){
                     guard let shop = vm.shop else {return}
                     let currentItem = shop.allShopItems()[currentIndex]
                     vm.buyItem(currentItem)
-                }
+                }.padding(16).font(.system(size: 16)).buttonStyle(.bordered).padding(.bottom, 48)
+                Spacer()
             }
         }.onAppear{
             if item == nil && vm.shop != nil {

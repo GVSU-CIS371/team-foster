@@ -23,7 +23,7 @@ struct LoginView: View {
             TextField("", text: $username)
             
             Text("Password:")
-            TextField("", text: $password)
+            SecureField("", text: $password)
             
             Button("Login"){
                 self.onLogin(username, password)

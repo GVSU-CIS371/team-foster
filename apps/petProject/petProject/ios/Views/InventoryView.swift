@@ -41,10 +41,15 @@ struct InventoryView: View {
                                     VStack{
                                         Text(iItem.name)
                                         Spacer()
+                                        Text(iItem.image).font(.system(size: 200))
+                                        Spacer()
                                         HStack{
                                             Text(iItem.type.rawValue)
                                             Spacer()
-                                            Text(String(invItem.quantity))
+                                            VStack{
+                                                Text("Effect Value: \(String(iItem.effectValue ?? -1))")
+                                                Text("Quantity: \(String(invItem.quantity))")
+                                            }
                                         }.padding(16)
                                     }.frame(maxWidth: .infinity, maxHeight: .infinity)
                                         .background(Color.blue).cornerRadius(10).tag(key)
@@ -76,14 +81,13 @@ struct InventoryView: View {
                     }
                 }
                 
-            }
+            }.frame(maxHeight: .infinity)
             
  
                 //Spacer()
-                Button("💰"){
+                Button("Shop 💰"){
                     self.onShop()
-                }
-                Spacer()
+                }.padding(32).font(.system(size: 16)).buttonStyle(.bordered).padding(.bottom, 48)
             }
         }.onAppear{
 

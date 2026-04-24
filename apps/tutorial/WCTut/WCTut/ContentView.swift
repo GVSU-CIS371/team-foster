@@ -21,11 +21,11 @@ struct ContentView: View {
     }
     
     var dataReceived: SomeDataType {
-        vm.receivedData ?? SomeDataType(text: "no data received")
+        vm.receivedData ?? SomeDataType(text: "No data received")
     }
     
     var dataSent: SomeDataType {
-        vm.sentData ?? SomeDataType(text: "no data sent")
+        vm.sentData ?? SomeDataType(text: "No data sent")
     }
     
     
@@ -36,34 +36,53 @@ struct ContentView: View {
     var body: some View {
         
         VStack{
-            HStack{
-                VStack{
-                    Text("Sent Message")
-                    Text(msgSent)
-                }
-                
-                VStack{
-                    Text("Received Message")
-                    Text(msgReceived)
+            Text("Watch Connectivity")
+            Spacer()
+            VStack{
+                Text("Message")
+                HStack{
+                    VStack(alignment: .leading){
+                        Text("Sent Message")
+                        Text(msgSent)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .leading){
+                        Text("Received Message")
+                        Text(msgReceived)
+                    }
                 }
             }
             
-            HStack{
-                
-                VStack{
-                    Text("Sent Data")
-                    Text(dataSent.text)
-                }
-                
-                VStack{
-                    Text("Received Data")
-                    Text(dataReceived.text)
+            Spacer()
+            
+            VStack{
+                Text("Data")
+                HStack{
+                    VStack(alignment: .leading){
+                        Text("Sent Data")
+                        Text(dataSent.text)
+                    }
+                    
+                    Spacer()
+                    
+                    VStack(alignment: .leading){
+                        Text("Received Data")
+                        Text(dataReceived.text)
+                    }
                 }
             }
         
+            Spacer()
         
             Text("Enter payload")
-            TextField("", text: $payload)
+            
+            HStack{
+                Spacer()
+                TextField("", text: $payload).border(Color.gray)
+                Spacer()
+            }
             
             HStack{
                 Button("Send as Message"){
@@ -79,7 +98,8 @@ struct ContentView: View {
                         }
                     }
                     
-                }
+                }.buttonStyle(.bordered)
+                
                 Button("Send as Data"){
                     let data = SomeDataType(text: self.payload)
                     DispatchQueue.main.async {
@@ -96,11 +116,11 @@ struct ContentView: View {
                         }
                         
                     }
-                }
+                }.buttonStyle(.bordered)
                 
                 
             }
-        }
+        }.padding(.all, 32)
     }
 
    

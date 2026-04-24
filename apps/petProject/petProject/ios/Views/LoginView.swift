@@ -29,15 +29,27 @@ struct LoginView: View {
     
     var body: some View {
         VStack(spacing: 0){
+            Spacer()
+            Text("Pet Project   🐶🐱🐹").font(Font.largeTitle).bold()
+            Spacer()
             Text("Username:")
-            TextField("", text: $username)
+            HStack(spacing: 16){
+                Spacer().padding(32)
+                TextField("", text: $username).padding(8).border(Color.gray)
+                Spacer().padding(32)
+            }
             
             Text("Password:")
-            TextField("", text: $password)
-            
+            HStack(spacing: 16){
+                Spacer().padding(32)
+                SecureField("", text: $password).padding(8).border(Color.gray)
+                Spacer().padding(32)
+            }
+            Spacer()
             Button("Login"){
                 self.onLogin(username, password)
-            }.padding(.top, 8)
+            }.padding(.top, 8).buttonStyle(.bordered)
+            Spacer()
         }.padding(.top, 16).onAppear{
             
         }.onDisappear {

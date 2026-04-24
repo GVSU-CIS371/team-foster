@@ -86,7 +86,7 @@ class AuthServiceIOS: ObservableObject, AuthService{
         do{
             print("before auth signout")
             try self.auth.signOut()
-            
+            print(self.auth.currentUser?.uid ?? "no user")
             print("after auth signout")
             self.username = nil
             self.userID = nil
