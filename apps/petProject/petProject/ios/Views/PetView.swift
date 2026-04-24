@@ -38,7 +38,7 @@ struct PetView: View{
     private var onInventory: () -> Void
     private var onOptions: () -> Void
     private let buttonSize: CGFloat = 32
-    private let fontColor: Color = .red
+    private let fontColor: Color = .white
 
     init(onInventory: @escaping () -> Void, onOptions: @escaping () -> Void) {
         self.onInventory = onInventory
@@ -75,7 +75,7 @@ struct PetView: View{
             
             Spacer()
             
-            HStack(spacing: 15) {
+            HStack(spacing: 5) {
                 Button(action: {
                     self.onInventory()
                 }){
@@ -84,7 +84,7 @@ struct PetView: View{
                         Text("Items").foregroundStyle(fontColor)
                     }
                     
-                }.frame(maxWidth: .infinity).border(Color.black, width: 2)
+                }.buttonStyle(.bordered)
                 
                 Button(action: {
                     Task{@MainActor in
@@ -97,10 +97,10 @@ struct PetView: View{
                     }
                     print("Pet Played!")}){
                     VStack{
-                        Text("🎮").font(.system(size: buttonSize * 2))
+                        Text("🎮").font(.system(size: buttonSize))
                         Text("Play").foregroundStyle(fontColor)
                     }
-                }.frame(maxWidth: .infinity).border(Color.black, width: 2)
+                }.buttonStyle(.bordered)
                 
                 Button(action: {
                     Task {@MainActor in
@@ -113,10 +113,10 @@ struct PetView: View{
                     }
                     print("Pet Fed!")}){
                     VStack{
-                        Text("🍗").font(.system(size: buttonSize * 2))
+                        Text("🍗").font(.system(size: buttonSize))
                         Text("Feed").foregroundStyle(fontColor)
                     }
-                }.frame(maxWidth: .infinity).border(Color.black, width: 2)
+                }.buttonStyle(.bordered)
                 
                 Button(action: {
                     Task {@MainActor in
@@ -130,10 +130,10 @@ struct PetView: View{
                     }
                     print("Pet Washed!")}){
                     VStack{
-                        Text("🚿").font(.system(size: buttonSize * 2))
+                        Text("🚿").font(.system(size: buttonSize))
                         Text("Wash").foregroundStyle(fontColor)
                     }
-                }.frame(maxWidth: .infinity).border(Color.black, width: 2)
+                }.buttonStyle(.bordered)
                 
                 Button(action: {
                     self.onOptions()}){
@@ -141,7 +141,7 @@ struct PetView: View{
                             Text("⚙️").font(.system(size: buttonSize))
                             Text("Menu").foregroundStyle(fontColor)
                         }
-                }.frame(maxWidth: .infinity).border(Color.black, width: 2)
+                }.buttonStyle(.bordered)
             }.frame(maxWidth: .infinity).padding(.horizontal, 16).background(Color.blue).padding(.bottom, 10)
             
         }.navigationBarBackButtonHidden(true).frame(maxWidth: .infinity, maxHeight: .infinity).alert("Missing Items", isPresented: $missingItem){

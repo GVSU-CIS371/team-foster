@@ -56,8 +56,7 @@ class ConnectionService: NSObject, WCSessionDelegate {
         dataHandlers[type] = { rawData, action, reply in
             guard let decoded = try? JSONDecoder().decode(T.self, from: rawData) else {return}
             handler(decoded, action) { replyData in
-                guard let encodedData = self.encode(data: replyData, action: action) else {return}//? JSONEncoder().encode(replyData) else {return}
-                //guard let encodedMsg = try? JSONEncoder().encode(MessageDataEnvelope(type: type, action: action, payload: encodedData)) else {return}
+                guard let encodedData = self.encode(data: replyData, action: action) else {return}
                 reply(encodedData)
             }
         }

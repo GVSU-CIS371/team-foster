@@ -66,15 +66,7 @@ class PetViewModel: ObservableObject {
             Task{@MainActor in
                 
                 print("watch vm pet update ", pet)
-                /*if self?.player?.pet != nil && pet.lastUpdate > (self?.player?.pet?.lastUpdate)!{
-                 self?.player?.pet = pet
-                 self?.petInit = true
-                 } else if self?.player?.pet == nil {
-                 self?.player?.pet = pet
-                 self?.petInit = true
-                 } else {
-                 print("pet not set")
-                 }*/
+
                 
                 let player = self?.player
                 
@@ -90,15 +82,7 @@ class PetViewModel: ObservableObject {
             Task{@MainActor in
                 
                 print("watch vm inventory update ", inv)
-                /*if self?.player?.inventory != nil && inv.lastUpdate > (self?.player?.inventory?.lastUpdate)!{
-                 self?.player?.inventory = inv
-                 self?.inventoryInit = true
-                 } else if self?.player?.inventory == nil {
-                 self?.player?.inventory = inv
-                 self?.inventoryInit = true
-                 } else {
-                 print("inventory not set")
-                 }*/
+
                 print("RECEIVED INVENTORY")
                 if self?.player?.inventory != nil && inv.items.isEmpty {
                     inv.items = self?.player?.inventory?.items ?? ["error":InventoryItem(id: "error", quantity: -1, userID: "error")]
@@ -117,15 +101,12 @@ class PetViewModel: ObservableObject {
             Task{@MainActor in
                 
                 print("watch vm inventory item update ", invItem)
-                /*if self?.player?.inventory != nil {
-                 self?.player?.inventory?.items[invItem.id] = invItem
-                 self?.invItemInit = true
-                 } else {
-                 print ("inventory item not set")
-                 }*/
 
                 if(invItem.id != "empty"){
-                    self?.player?.inventory?.items[invItem.id] = invItem as InventoryItem
+                    
+                    guard let player = self?.player else {return}
+                    player.inventory?.items[invItem.id] = invItem as InventoryItem
+                    self?.player = player
                 }
                 self?.invItemInit = true
 
@@ -136,15 +117,7 @@ class PetViewModel: ObservableObject {
             Task{@MainActor in
                 
                 print("watch vm shop update ", shop)
-                /*if self?.shop != nil && shop.lastUpdate > (self?.shop?.lastUpdate)!{
-                 self?.shop = shop
-                 self?.shopInit = true
-                 } else if self?.shop == nil {
-                 self?.shop = shop
-                 self?.shopInit = true
-                 } else {
-                 print("shop not set")
-                 }*/
+ 
                 if shop.items.isEmpty {
                     shop.items = self?.shop?.items ?? [:]
                 }
@@ -162,14 +135,10 @@ class PetViewModel: ObservableObject {
             Task{@MainActor in
                 
                 print("watch vm shop item update ", shopItem)
-                /*if self?.shop != nil {
-                 self?.shop?.items[shopItem.id] = shopItem
-                 self?.shopItemInit = true
-                 } else {
-                 print ("shop item not set")
-                 }*/
-                
-                self?.shop?.items[shopItem.id] = shopItem as ShopItem
+
+                guard let shop = self?.shop else {return}
+                shop.items[shopItem.id] = shopItem as ShopItem
+                self?.shop = shop
                 self?.shopItemInit = true
                 
                 
@@ -357,6 +326,7 @@ class PetViewModel: ObservableObject {
         do{
             print("LOGGED IN START player:", self.player?.id ?? "nil")
             if username != ""{
+                print(username)
                 await initPlayer(userID: userID, username: username)
                 print("Player initialized")
             } else if userID != "" {
@@ -449,6 +419,7 @@ class PetViewModel: ObservableObject {
             play = try await dbUtil.getPlayer(userID: userID)
             print("initPlayer play ", play ?? "no player")
         } catch DBError.notFound {
+            print(username)
             await dbUtil.addPlayer(userID: userID, username: username)
             do{
                 play = try await dbUtil.getPlayer(userID: userID)

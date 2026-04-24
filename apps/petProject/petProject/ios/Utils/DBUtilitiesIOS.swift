@@ -59,6 +59,8 @@ class DBUtilitiesIOS: DBUtilities {
                 Task{@MainActor in
 
                     do{
+                        print("ADD PLAYER IOS")
+                        print(username)
                         await self.addPlayer(userID: userID, username: username)
 
                         let player = try await self.getPlayer(userID: userID)
@@ -417,7 +419,7 @@ class DBUtilitiesIOS: DBUtilities {
         shop.lastUpdate = Date()
         await DBService.shared.updateDoc(collectName: collectName, data: shop, filters: [filters])
         
-        cm.sendData(data: shopID, action: .update){ reply in
+        cm.sendData(data: shop, action: .update){ reply in
             print("update shop")
             guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
                   let decoded = try? JSONDecoder().decode(Shop.self, from: response.payload) else {
@@ -437,7 +439,7 @@ class DBUtilitiesIOS: DBUtilities {
             print("update player")
             guard let response = try? JSONDecoder().decode(ConnectionManager.EncodedMessage.self, from: reply),
                   let decoded = try? JSONDecoder().decode(ShopItem.self, from: response.payload) else {
-                print("problem updating watch of player changes")
+                print("problem updating watch of shop item changes")
                 return }
             print(decoded)
             //continuation.resume(returning: ())
@@ -769,6 +771,7 @@ class DBUtilitiesIOS: DBUtilities {
     func addPlayer(userID: String, username: String) async {
         
         print("ADD PLAYER IOS")
+        print(username)
         let collectName = CollectionNames.users.rawValue
         let data = Player(id: userID, username: username)
         

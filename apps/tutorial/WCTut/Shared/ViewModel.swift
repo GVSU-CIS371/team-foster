@@ -19,6 +19,7 @@ class ViewModel: ObservableObject{
     
     let connectionService: ConnectionService
     
+    // to show proof of source
     var platform: String {
         #if os(watchOS)
         return "watchOS"
@@ -31,6 +32,8 @@ class ViewModel: ObservableObject{
     init(cm: ConnectionService = .shared) {
         self.connectionService = cm
         
+        // register message handler
+        // (event: "result") is same as ["event":"result"]
         connectionService.register(event: "result"){ [weak self] data, reply in
             DispatchQueue.main.async {
                 guard let self else {return}
@@ -42,6 +45,8 @@ class ViewModel: ObservableObject{
         }
         
         
+        // register message data handler
+        // SomeDataType could be any data type
         connectionService.registerData(type: SomeDataType.self) { [weak self] data, action, reply in
             DispatchQueue.main.async {
                 switch action {
@@ -51,7 +56,7 @@ class ViewModel: ObservableObject{
                     self.sentData = SomeDataType(text: data.text + " " + self.platform)
                     reply(self.sentData ?? SomeDataType(text: "no data"))
                 default:
-                    break
+                    reply(data)
                 }
                 
             }

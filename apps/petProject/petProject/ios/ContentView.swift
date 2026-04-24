@@ -24,6 +24,7 @@ struct ContentView: View {
             LoginView(){ username, password in
                 
                 Task{ @MainActor in
+                    guard username != "" else {return}
                     await vm.login(username: username, password: password)
                     
                     guard vm.player != nil else {
@@ -140,7 +141,7 @@ struct ContentView: View {
             print("login status changed", vm.authService.userID ?? "no user id")
             if(vm.authService.userID != nil){
                 Task{ @MainActor in
-                    await self.vm.loggedIn(userID: vm.authService.userID!, username: "")
+                    await self.vm.loggedIn(userID: vm.authService.userID!, username: vm.authService.username ?? "")
 
                     guard vm.player != nil else {
                         print("no player")

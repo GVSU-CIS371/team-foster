@@ -40,12 +40,14 @@ struct InventoryView: View {
                                     VStack{
                                         Text(iItem.name)
                                         Spacer()
+                                        Text(iItem.image).font(.system(size: 30))
+                                        Spacer()
                                         HStack{
                                             Text(iItem.type.rawValue)
                                             Spacer()
-                                            Text(String(invItem.quantity))
-                                        }.padding(16)
-                                    }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                                            Text("Quantity: \(String(invItem.quantity))")
+                                        }
+                                    }.padding(.bottom, 16).padding(.horizontal, 16).frame(maxWidth: .infinity, maxHeight: .infinity)
                                         .background(Color.blue).cornerRadius(10).tag(key)
                                 }
                             }

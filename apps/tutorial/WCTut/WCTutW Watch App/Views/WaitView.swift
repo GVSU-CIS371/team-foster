@@ -9,8 +9,8 @@ import SwiftUI
 
 struct WaitView: View {
     @ObservedObject var vm: ViewModel
-    @State var received: String = ""
-    @State var sent: String = ""
+    @State var received: String = " "
+    @State var sent: String = " "
         
     init(vm: ViewModel){
         self._vm = ObservedObject(wrappedValue: vm)
@@ -20,6 +20,7 @@ struct WaitView: View {
         VStack {
             Text("Received")
             Text(received)
+            Spacer()
             Text("Sent")
             Text(sent)
         }.onChange(of: self.vm.sentMessage){

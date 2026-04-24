@@ -23,6 +23,7 @@ struct ContentView: View {
                 //if(vm.prevLogin){
                     print("NO PREV LOGIN")
                     Task{ @MainActor in
+                        guard username != "" else {return}
                         await vm.login(username: username, password: password)
                     }
                 //}

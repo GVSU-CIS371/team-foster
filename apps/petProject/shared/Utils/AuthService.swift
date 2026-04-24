@@ -9,6 +9,7 @@ import SwiftUI
 protocol AuthService {
     var userID: String? { get }
     var loggedIn: Bool { get }
+    var username: String? { get }
     
     init(cm: ConnectionManager)
     func logout() async
