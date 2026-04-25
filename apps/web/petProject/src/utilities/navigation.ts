@@ -35,6 +35,7 @@ function useNavigation() {
     function logout(){
         gameStore.loggedIn = false
         gameStore.stopPetTimer()
+        gameStore.logout()
         goToLogin()
     }
 

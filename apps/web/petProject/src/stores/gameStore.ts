@@ -38,7 +38,7 @@ export const useGameStore = defineStore('game', {
                 console.log("TIMER PET: ", this.petStore.pet)
                 if (this.playerStore.hasPet){
                     this.petStore.decayPetStats()
-                    updateDocument(CollectionNames.Pets, this.playerStore.player?.id ?? "", toDbPet(this.petStore.pet))
+                    updateDocument(CollectionNames.Pets, this.playerStore.player?.id ?? "", toDbPet(this.petStore.pet!))
                 }
             }, tickInterval * 1000) // sec -> ms
         },
@@ -58,6 +58,8 @@ export const useGameStore = defineStore('game', {
                 this.startPetTimer()
 
                 updateDocument(CollectionNames.Pets, this.playerStore.player.id, dbPet)
+
+                this.playerStore.startPetListener(this.playerStore.player.id)
             } 
         },
 
@@ -118,7 +120,7 @@ export const useGameStore = defineStore('game', {
             }
 
             updateDocument(CollectionNames.Inventories, userID!, toDbInventory(this.playerStore.player?.inventory!))
-            updateDocument(CollectionNames.Pets, userID!, toDbPet(this.petStore.pet))
+            updateDocument(CollectionNames.Pets, userID!, toDbPet(this.petStore.pet!))
         },
 
         async initialize(userID: string, username: string) {
@@ -156,7 +158,7 @@ export const useGameStore = defineStore('game', {
                 this.shopStore.shop = toShop(shop)
 
                 console.log("Shop: ", this.shopStore.shop)
-                console.log(shop.shop_id)
+                console.log(shop.shopID)
 
                 rawCollection = await getCollection(CollectionNames.ShopItems, {shop_id: {op: "==", value: this.shopStore.shop.id}})
                 
@@ -171,6 +173,7 @@ export const useGameStore = defineStore('game', {
             }
 
             console.log("Completed Shop: ", this.shopStore.shop)
+            this.shopStore.startShopListener(this.shopStore.shop!.id)
 
             var rawDocument = await getDocument(CollectionNames.Users, userID)
 
@@ -220,6 +223,7 @@ export const useGameStore = defineStore('game', {
 
                         console.log("Player Pet: ", this.playerStore.player.pet)
                         console.log(this.playerStore.player?.pet?.typeID)
+                        this.playerStore.startPetListener(userID)
                     }
                     rawDocument = await getDocument(CollectionNames.Inventories, userID)
 
@@ -239,16 +243,49 @@ export const useGameStore = defineStore('game', {
                         }
 
                         console.log("Player Inventory: ", this.playerStore.player.inventory)
+                        this.playerStore.startInventoryListener(userID)
+                        
                     } else {
                         this.playerStore.player.inventory = createInventory({id: userID})
                         addNamedDocument(CollectionNames.Inventories, userID, toDbInventory(this.playerStore.player.inventory))
+                        this.playerStore.startInventoryListener(userID)
                     }
                 }
 
                 console.log("Complete Player: ", this.playerStore.player)
-
+                this.playerStore.startPlayerListener(userID)
+                console.log(this.playerStore.player.inventory)
             }
         }, 
+
+        logout(){
+            this.playerStore.player!.pet = null
+            this.petStore.pet = null
+            this.playerStore.player!.inventory = null
+            this.playerStore.player = null
+
+            if(this.playerStore.petListener){
+                this.playerStore.petListener()
+                this.playerStore.petListener = null
+            }
+
+            if(this.playerStore.invItemListener){
+                this.playerStore.invItemListener()
+                this.playerStore.invItemListener = null
+            }
+
+            if(this.playerStore.inventoryListener){
+                this.playerStore.inventoryListener()
+                this.playerStore.inventoryListener = null
+            }
+
+            if(this.playerStore.playerListener){
+                this.playerStore.playerListener()
+                this.playerStore.playerListener = null
+            }
+
+
+        }
 
 
 

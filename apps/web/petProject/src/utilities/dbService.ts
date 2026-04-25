@@ -1,5 +1,5 @@
 import { db } from "./firebase.ts";
-import {doc, collection, query, where, setDoc, addDoc, getDoc, getDocs, deleteDoc, Timestamp } from "firebase/firestore"
+import {doc, collection, query, where, setDoc, addDoc, getDoc, getDocs, deleteDoc, Timestamp, onSnapshot } from "firebase/firestore"
 import type { WhereFilterOp } from "firebase/firestore";
 
 
@@ -15,6 +15,7 @@ export const CollectionNames = {
 } as const;
 
 export type CollectionNames = (typeof CollectionNames)[keyof typeof CollectionNames];
+var listeners = new Map<string, () => void>
 
 function updateDbTimestamp(obj: any){
     if(obj?.last_update) {
@@ -87,6 +88,43 @@ async function getCollection(collectName: string, filters: {[field: string]: {op
     }
 }
 
+function startDocListener(collectName: string, docName: string, onUpdate: (data: any) => void){
+    const docRef = doc(db, collectName, docName)
+    const listen = onSnapshot(docRef, (doc) => {
+        console.log(collectName + "Doc Listener Fired")
+        if(doc.exists()){
+            console.log(doc.data());
+            onUpdate(doc.data())
+        }
+    });
+
+    return listen
+}
+
+function startCollectionListener(collectName: string, filters: {[filed: string]: {op: string, value: string}} = {}, onUpdate: (data: any[]) => void){
+    const collect = filterCollection(collectName, filters)
+    const listen = onSnapshot(collect, (collection) => {
+        console.log(collectName + "Collection Listener Fired")
+        const docs = collection.docs.map(d => ({id: d.id, ...d.data()}))
+        onUpdate(docs)
+    })    
+
+    return listen
+}
+
+function stopListener(key:string) {
+    const stopListen = listeners.get(key)
+
+    if(stopListen){
+        stopListen();
+        listeners.delete(key)
+    }
+}
+
+function stopAllListeners(){
+    listeners.forEach((_, name) => stopListener(name))
+}
+
 async function updateCollection(collectName: string, data: Object, filters: {[field:string]: {op:string, value:string}} = {}){
     try{
         const collect = filterCollection(collectName, filters)
@@ -148,4 +186,6 @@ function snapshotConverter<T>(snap: any) {
     return obj;
 } 
 
-export {updateDate, updateDbTimestamp, getDocument, getCollection, updateDocument, deleteDocument, addDocument, addNamedDocument, updateCollection, snapshotConverter}
+export {updateDate, updateDbTimestamp, getDocument, getCollection, updateDocument, 
+        deleteDocument, addDocument, addNamedDocument, updateCollection, snapshotConverter, 
+        startDocListener, startCollectionListener, stopListener, stopAllListeners}

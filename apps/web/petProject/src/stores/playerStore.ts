@@ -1,9 +1,17 @@
 import { defineStore} from 'pinia'
 import type { Player } from '../types/player.ts'
+import {toPlayer} from '../types/player.ts'
+import { CollectionNames, startCollectionListener, startDocListener } from '../utilities/dbService.ts'
+import { toInventory, toInventoryItem } from '../types/inventory.ts'
+import {toPet} from '../types/pet.ts'
 
 export const usePlayerStore = defineStore('player', {
     state: () => ({
-        player: null as Player | null
+        player: null as Player | null,
+        playerListener: null as null | (() => void),
+        inventoryListener: null as null | (() => void),
+        invItemListener: null as null | (() => void),
+        petListener: null as null | (() => void)
     }),
     getters: {
         hasPet: (state) => {
@@ -39,6 +47,57 @@ export const usePlayerStore = defineStore('player', {
 
          income(multiplier: number = 1){
             this.player!.currency += 100 * multiplier
+        },
+
+        startPlayerListener(userID: string){
+            this.playerListener = startDocListener(CollectionNames.Users, userID, (data) => {
+                var player = toPlayer(data)
+                if (player.pet == null && this.player?.pet != null){
+                    player.pet = this.player?.pet
+                }
+
+                if (player.inventory == null && this.player?.inventory != null){
+                    player.inventory = this.player?.inventory
+                }
+
+                this.player = player
+            })
+        },
+
+        startInventoryListener(userID: string){
+            this.inventoryListener = startDocListener(CollectionNames.Inventories, userID, (data) => {
+                var inv = toInventory(data)
+                if (this.player){
+                    if (Object.keys(inv.items).length === 0 && Object.keys(this.player?.inventory?.items ?? {}).length > 0){
+                        inv.items = this.player?.inventory?.items ?? {}
+                    }
+
+                    this.player.inventory = inv
+                }
+            })
+
+            let filters = {
+                user_id: {op: "==", value: userID!}, 
+            }
+            
+            this.invItemListener = startCollectionListener(CollectionNames.InventoryItems, filters, (items) =>{
+                console.log("INV ITEM LISTENER")
+                if (this.player?.inventory){
+                    items.forEach( item => {
+                        console.log(item)
+                        this.player!.inventory!.items[item.item_id] = toInventoryItem(item)
+                    })
+                }
+            })
+        },
+
+        startPetListener(userID: string){
+                console.log("START PET LISTENER" + userID)
+                this.petListener = startDocListener(CollectionNames.Pets, userID, (data) => {
+                    console.log(userID)
+                    if(this.player)
+                        this.player!.pet = toPet(data)
+                })
         }
     }
 })

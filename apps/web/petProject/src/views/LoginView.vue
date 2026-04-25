@@ -1,7 +1,7 @@
 <template>
     <div class="login-page">
     <form @submit.prevent="loginHandler">
-        <h1>Pet Management Game</h1>
+        <h1>Pet Project 🐶🐱🐹</h1>
         <p class="username">Username: <input v-model="username" placeholder="Username"> </p>
         <p class="password">Password: <input v-model="password" type="password" placeholder="Password"></p>
         <div class="login-button">
