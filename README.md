@@ -22,8 +22,10 @@ Best of luck! 🚀  -->
 Term Project Repository for CIS 357 & CIS 371
 
 Quick Links <br>
-* Tutorial Page Link - https://github.com/GVSU-CIS371/team-foster/wiki/Tutorial
-* Tutorial Repo Link - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/tutorial/WCTut
+* CIS 371 Web Project Code - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/web
+* CIS 357 iOS/WatchOS Project Code - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/petProject
+* CIS 357 Tutorial Page Link - https://github.com/GVSU-CIS371/team-foster/wiki/Tutorial
+* CIS 357 Tutorial Repo Link - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/tutorial/WCTut
 * CIS 357 Tutorial Video - https://youtu.be/OKpX8erjb5s
 * CIS 357 Presentation Video - https://youtu.be/Vx-9YrfzzAk
 * CIS 357 Presentation Slides - https://docs.google.com/presentation/d/1wdoG8GCD7rbQs74r2Wr7ukYxCDS1ch64mishv-AFPeQ/edit?usp=sharing
