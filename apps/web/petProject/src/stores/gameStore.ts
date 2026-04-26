@@ -31,15 +31,25 @@ export const useGameStore = defineStore('game', {
             if (this.timerId !== null) clearInterval(this.timerId)
             this.timerId = setInterval(() => {
 
-                console.log("TIMER PLAYER: ", this.playerStore.player)
-                this.playerStore.income()
-                updateDocument(CollectionNames.Users, this.playerStore.player!.id, toDbPlayer(this.playerStore.player!))
+                console.log("lastUpdate value:", this.playerStore.player?.lastUpdate)
+    console.log("lastUpdate type:", typeof this.playerStore.player?.lastUpdate)
+    console.log("lastUpdate constructor:", this.playerStore.player?.lastUpdate?.constructor?.name)
+    
 
-                console.log("TIMER PET: ", this.petStore.pet)
-                if (this.playerStore.hasPet){
-                    this.petStore.decayPetStats()
-                    updateDocument(CollectionNames.Pets, this.playerStore.player?.id ?? "", toDbPet(this.petStore.pet!))
+                if (Date.now() - (this.playerStore.player?.lastUpdate.getTime() ?? Date.now()) > tickInterval * 1000){
+                    console.log("TIMER PLAYER: ", this.playerStore.player)
+                    this.playerStore.income()
+                    updateDocument(CollectionNames.Users, this.playerStore.player!.id, toDbPlayer(this.playerStore.player!))
                 }
+
+                if (Date.now() - (this.petStore.pet?.lastUpdate.getTime() ?? Date.now()) > tickInterval * 1000){
+                    console.log("TIMER PET: ", this.petStore.pet)
+                    if (this.playerStore.hasPet){
+                        this.petStore.decayPetStats()
+                        updateDocument(CollectionNames.Pets, this.playerStore.player?.id ?? "", toDbPet(this.petStore.pet!))
+                    }
+                }
+                
             }, tickInterval * 1000) // sec -> ms
         },
 

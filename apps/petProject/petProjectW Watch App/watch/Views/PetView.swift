@@ -135,6 +135,8 @@ struct PetView: View{
             Button("Ok", role: .cancel) {}
         } message: {
             Text(alertMessage)
+        }.onAppear {
+            self.vm.petTimer()
         }
     }
 }

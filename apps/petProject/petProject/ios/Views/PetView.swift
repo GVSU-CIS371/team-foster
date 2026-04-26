@@ -151,7 +151,7 @@ struct PetView: View{
         }.onAppear {
             print("PET VIEW")
             print(ObjectIdentifier(vm.player!))
-
+            self.vm.petTimer()
         }
     }
 }

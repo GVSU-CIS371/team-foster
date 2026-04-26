@@ -167,13 +167,16 @@ class PetViewModel: ObservableObject {
             print("MISSING PET UPDATE PET DECAY")
             return }
         print("PLAYER AND PET OK UPDATE PET DECAY")
+        
         let lastPetUpdated = self.player?.pet?.lastUpdate ?? nil
         let timeSincePetUpdate = Date().timeIntervalSince(lastPetUpdated!) / timeUnit
         let intervalsSincePetUpdate = Int(floor(timeSincePetUpdate / Double(self.decayInterval)))
+        
+        guard intervalsSincePetUpdate > 0 else {return}
         let typeID = self.player!.pet!.typeID
         
         self.player?.currency += 100 * intervalsSincePetUpdate
-        self.player?.pet?.decayPetStats(type: self.petTypes[typeID]!, intervals: intervalsSincePetUpdate)
+        self.player?.pet?.decayPetStats(type: self.petTypes[typeID]!, intervals: 1)
 
         do{
             print("BEFORE UPDATE PLAYER")

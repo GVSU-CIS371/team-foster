@@ -32,10 +32,10 @@ function updateDbTimestamp(obj: any){
 function updateDate(obj: any){
     if(obj?.lastUpdate){
         console.log("updatedate lastUpdate date")
-        return {...obj, lastUpdate: Date.now()}
+        return {...obj, lastUpdate: new Date()}
     } else if(obj?.last_update){
         console.log("updatedate last_update date")
-        return {...obj, last_update: Date.now()}
+        return {...obj, last_update: new Date()}
     } else {
         return obj
     }
@@ -94,7 +94,7 @@ function startDocListener(collectName: string, docName: string, onUpdate: (data:
         console.log(collectName + "Doc Listener Fired")
         if(doc.exists()){
             console.log(doc.data());
-            onUpdate(doc.data())
+            onUpdate(convertSnapDate(doc.data()))
         }
     });
 
@@ -105,7 +105,7 @@ function startCollectionListener(collectName: string, filters: {[filed: string]:
     const collect = filterCollection(collectName, filters)
     const listen = onSnapshot(collect, (collection) => {
         console.log(collectName + "Collection Listener Fired")
-        const docs = collection.docs.map(d => ({id: d.id, ...d.data()}))
+        const docs = collection.docs.map(d => convertSnapDate(d))
         onUpdate(docs)
     })    
 
@@ -182,9 +182,13 @@ function filterCollection(collectName: string, filters: {[field: string]: {op: s
 
 function snapshotConverter<T>(snap: any) {
     console.log("snapshot converter")
-    let obj = updateDate(snap.data() as T);
+    let obj = convertSnapDate(snap.data() as T);
     return obj;
 } 
+
+function convertSnapDate(snap: any){
+    return updateDate(snap)
+}
 
 export {updateDate, updateDbTimestamp, getDocument, getCollection, updateDocument, 
         deleteDocument, addDocument, addNamedDocument, updateCollection, snapshotConverter, 
