@@ -105,7 +105,7 @@ function startCollectionListener(collectName: string, filters: {[filed: string]:
     const collect = filterCollection(collectName, filters)
     const listen = onSnapshot(collect, (collection) => {
         console.log(collectName + "Collection Listener Fired")
-        const docs = collection.docs.map(d => convertSnapDate(d))
+        const docs = collection.docs.map(d => convertSnapDate(d.data()))
         onUpdate(docs)
     })    
 

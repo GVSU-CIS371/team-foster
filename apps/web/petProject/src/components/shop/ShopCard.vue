@@ -24,6 +24,7 @@ function buyItem() {
         <div class="item-image">{{ item.image }}</div>
         <div class="item-name">{{ item.name }}</div>
         <div class="item-price">{{ data.price }} coins</div>
+        <div class="item-quantity">Quantity: {{ data.quantity ? data.quantity : "∞"}}</div>
 
         <BaseButton :text="'Buy'" @click="buyItem"/>
     </div>

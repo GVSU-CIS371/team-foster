@@ -24,9 +24,14 @@
                             Your inventory is empty.
                         </div>
                         <div v-else>
-                            <v-card-text v-for="(item, index) in gameStore.playerStore.player?.inventory?.items" :key="index" :name="item.itemID" :data="item">
-                                {{ item.itemID }} - Quantity: {{ item.quantity }}
-                            </v-card-text>
+                            <div class="inv-items">
+                                <v-row class="ga-4" align="stretch" justify="center">
+                                    <v-col v-for="invItem in inventoryItems" :key="invItem.itemID" :data="invItem"
+                                    cols="12" sm="6" lg="4" class="d-flex">
+                                <InventoryCard :data="invItem" class="flex-grow-1"/>
+                                </v-col>
+                                </v-row>
+                            </div>
                         </div>
                     </v-card-text>
                 </v-card>
@@ -70,6 +75,7 @@
     import { useGameStore } from '../stores/gameStore.ts';
     import BaseButton from '../components/shared/BaseButton.vue';
     import ShopCard from '../components/shop/ShopCard.vue';
+    import InventoryCard from '../components/inventory/InventoryCard.vue';
 
 
     const gameStore = useGameStore()
@@ -97,6 +103,9 @@
         showShop.value = true
     }
 
+    const inventoryItems = computed(() => 
+        Object.values(gameStore.playerStore.player?.inventory?.items ?? {})
+    )
 
 
 </script>

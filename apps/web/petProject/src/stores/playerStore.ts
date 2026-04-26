@@ -67,10 +67,9 @@ export const usePlayerStore = defineStore('player', {
         startInventoryListener(userID: string){
             this.inventoryListener = startDocListener(CollectionNames.Inventories, userID, (data) => {
                 var inv = toInventory(data)
-                if (this.player){
-                    if (Object.keys(inv.items).length === 0 && Object.keys(this.player?.inventory?.items ?? {}).length > 0){
-                        inv.items = this.player?.inventory?.items ?? {}
-                    }
+                
+                if (this.player && this.player.inventory){
+                    inv.items = this.player?.inventory?.items
 
                     this.player.inventory = inv
                 }
@@ -81,12 +80,13 @@ export const usePlayerStore = defineStore('player', {
             }
             
             this.invItemListener = startCollectionListener(CollectionNames.InventoryItems, filters, (items) =>{
-                console.log("INV ITEM LISTENER")
+                console.log("INV ITEM LISTENER", items)
                 if (this.player?.inventory){
                     items.forEach( item => {
                         console.log(item)
                         this.player!.inventory!.items[item.item_id] = toInventoryItem(item)
                     })
+                    console.log("inventory after update", this.player.inventory.items)
                 }
             })
         },
