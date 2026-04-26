@@ -151,6 +151,8 @@ class PetViewModel: ObservableObject {
     }
     
     func petTimer() {
+        guard !timer.isValid else {return}
+        
         self.timer = Timer.scheduledTimer(withTimeInterval: 5.0, repeats: true){ _ in
             
             Task{ @MainActor in
@@ -371,6 +373,7 @@ class PetViewModel: ObservableObject {
             self.shopItemInit = false
             self.logged = false
             self.prevLogin = true
+            self.timer.invalidate()
             self.dbUtil.stopListening()
             await self.authService.logout()
             
