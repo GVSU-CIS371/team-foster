@@ -66,7 +66,7 @@
 }
 
 .pet-image {
-    font-size: clamp(3rem, 10vw, 8rem);
+    font-size: clamp(3rem, 20vw, 10rem);
     line-height: 1;
 }
 
