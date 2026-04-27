@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
 import type { Shop } from '../types/shop.ts'
 import {toShop, toShopItem} from '../types/shop.ts'
-import { startDocListener, startCollectionListener, CollectionNames } from '../utilities/dbService.ts'
+import { startCollectionListener, CollectionNames } from '../utilities/dbService.ts'
 
 //import { testShopItems } from '../types/mockData.ts'
 

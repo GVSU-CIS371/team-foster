@@ -26,9 +26,6 @@ const gameStore = useGameStore()
 
 const item = computed(() => gameStore.items[data.value.itemID])
 
-function useItem() {
-    gameStore.useItem(data.value.itemID)
-}
 
 
 

@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
 import type {Pet, PetType } from '../types/pet.ts'
-import { createPet, toPet } from '../types/pet.ts'
-import { CollectionNames, startDocListener } from '../utilities/dbService.ts'
 
 
 export const usePetStore = defineStore('pet', {
