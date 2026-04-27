@@ -22,6 +22,7 @@ Best of luck! 🚀  -->
 Term Project Repository for CIS 357 & CIS 371
 
 Quick Links <br>
+* CIS 371 Web Project GitHub Page - https://gvsu-cis371.github.io/pet
 * CIS 371 Web Project Code - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/web
 * CIS 357 iOS/WatchOS Project Code - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/petProject
 * CIS 357 Tutorial Page Link - https://github.com/GVSU-CIS371/team-foster/wiki/Tutorial
