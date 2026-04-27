@@ -38,7 +38,7 @@
 
 <style scoped>
 .pet-card {
-    background-color: blue;
+    background-color: transparent;
     height: 100%;
     width: 100%;
     max-width: 50em;
@@ -66,7 +66,8 @@
 }
 
 .pet-image {
-    font-size: 2000%;
+    font-size: clamp(3rem, 10vw, 8rem);
+    line-height: 1;
 }
 
 </style>

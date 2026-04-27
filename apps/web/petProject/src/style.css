@@ -30,7 +30,7 @@ body {
   display: flex;
   place-items: center;
   width: 100%;
-  height: 100%;
+  height: 100vh;
 
 }
 
@@ -73,7 +73,7 @@ button:focus-visible {
 }
 
 .v-btn, .base-button{
-  background-color: green;
+  background-color: grey;
 }
 
 @media (prefers-color-scheme: light) {

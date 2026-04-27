@@ -15,11 +15,11 @@
             </div>
         </div>
 
-        <v-dialog v-model="showInventory" transition="dialog-bottom-transition">
+        <v-dialog v-model="showInventory" transition="dialog-bottom-transition" width="50%">
             <div class="sheet-container">
                 <v-card class="sheet">
                 <v-card-title>Inventory</v-card-title>
-                    <v-card-text>
+                    <v-card-text class="inv-content">
                         <div v-if="gameStore.playerStore.player?.inventory && Object.values(gameStore.playerStore.player?.inventory.items).length === 0">
                             Your inventory is empty.
                         </div>
@@ -123,17 +123,24 @@
     gap: 1rem;
 }
 
+.pet-section h1{
+    margin-top: 0;
+}
+
 .subtitle {
     font-size: 1rem;
     padding: 0 0 0 2rem;
 }
 
-.title{
-    font-size: 2rem;
-    padding: 0.5rem 1rem;
+.title {
+    font-size: clamp(1.2rem, 2vw, 2rem);
 }
 
-.shop-items{
+.subtitle {
+    font-size: clamp(0.8rem, 1.2vw, 1rem);
+}
+
+.shop-items, .inv-items{
     gap: 1rem;
 }
 
@@ -141,16 +148,20 @@
     font-size: 3rem;
 }
 
-.shop-content{
+.shop-content, .inv-content{
     margin: 1rem;
 }
 
-.pet-page{
-    display:flex;
+.pet-page {
+    display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
     justify-content: flex-start;
+
+    font-size: clamp(14px, 1.2vw, 18px);
 }
+
+
 
 .pet-card{
     display:flex;
