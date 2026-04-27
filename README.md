@@ -1,3 +1,4 @@
+<!--[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/5L4AYPa2)
 # **Term Project**  
 
 **Hello, Students!** 👋 
@@ -16,4 +17,17 @@ Your **Term Project** is an essential part of the course. Please review the inst
 - Plan your work and stay on schedule.  
 - Test your project regularly.  
 
-Best of luck! 🚀  
+Best of luck! 🚀  -->
+
+Term Project Repository for CIS 357 & CIS 371
+
+Quick Links <br>
+* CIS 371 Web Project GitHub Page - https://gvsu-cis371.github.io/team-foster/
+* CIS 371 Web Project Code - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/web
+* CIS 357 iOS/WatchOS Project Code - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/petProject
+* CIS 357 Tutorial Page Link - https://github.com/GVSU-CIS371/team-foster/wiki/Tutorial
+* CIS 357 Tutorial Repo Link - https://github.com/GVSU-CIS371/team-foster/tree/main/apps/tutorial/WCTut
+* CIS 357 Tutorial Video - https://youtu.be/OKpX8erjb5s
+* CIS 357 Presentation Video - https://youtu.be/Vx-9YrfzzAk
+* CIS 357 Presentation Slides - https://docs.google.com/presentation/d/1wdoG8GCD7rbQs74r2Wr7ukYxCDS1ch64mishv-AFPeQ/edit?usp=sharing
+ 
