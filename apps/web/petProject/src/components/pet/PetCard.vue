@@ -51,11 +51,11 @@
 }
 
 .pet-name {
-    font-size: 250%;
+    font-size: clamp(3rem, 10vw, 8rem);
 } 
 
 .pet-type-name {
-    font-size: 200%;
+    font-size: clamp(3rem, 10vw, 8rem);
 }
 
 .pet-stats {
