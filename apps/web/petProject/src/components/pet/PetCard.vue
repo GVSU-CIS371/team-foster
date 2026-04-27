@@ -51,11 +51,11 @@
 }
 
 .pet-name {
-    font-size: clamp(3rem, 10vw, 8rem);
+    font-size: clamp(1rem, 10vw, 2rem);
 } 
 
 .pet-type-name {
-    font-size: clamp(3rem, 10vw, 8rem);
+    font-size: clamp(1rem, 10vw, 2rem);
 }
 
 .pet-stats {
@@ -66,7 +66,7 @@
 }
 
 .pet-image {
-    font-size: clamp(3rem, 20vw, 10rem);
+    font-size: clamp(8rem, 20vw, 20rem);
     line-height: 1;
 }
 
